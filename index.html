@@ -322,7 +322,7 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div class="fr3">
               <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="np-mat" onchange="calc()"><option value="">— Selecciona —</option></select></div>
               <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec" onchange="calc()"><option value="">— Selecciona —</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam" onchange="calc()"><option value="">— Selecciona —</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option></select></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam" onchange="onTam1()"><option value="">— Selecciona —</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
             </div>
           </div>
           <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:11px">
@@ -330,7 +330,19 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div class="fr3">
               <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="np-mat2" onchange="calc()"><option value="">Ninguno</option></select></div>
               <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec2" onchange="calc()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam2" onchange="calc()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option></select></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam2" onchange="onTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+            </div>
+          </div>
+          <div id="tam1-custom" style="display:none;margin-bottom:11px">
+            <div class="fr">
+              <div class="fg" style="margin-bottom:0"><label class="fl">Ancho (cm)</label><input type="number" class="fc" id="np-tam1-w" step="0.1" min="0" placeholder="ej: 15" oninput="calc()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="np-tam1-h" step="0.1" min="0" placeholder="ej: 25" oninput="calc()"></div>
+            </div>
+          </div>
+          <div id="tam2-custom" style="display:none;margin-bottom:11px">
+            <div class="fr">
+              <div class="fg" style="margin-bottom:0"><label class="fl">Ancho (cm)</label><input type="number" class="fc" id="np-tam2-w" step="0.1" min="0" placeholder="ej: 15" oninput="calc()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="np-tam2-h" step="0.1" min="0" placeholder="ej: 25" oninput="calc()"></div>
             </div>
           </div>
           <div class="fr">
@@ -370,9 +382,21 @@ tbody td{padding:10px 12px;color:var(--text)}
           </div>
           <div id="p-empty" style="text-align:center;padding:16px;color:var(--text2);font-size:12px">Sin líneas</div>
           <table class="pt" id="p-table" style="display:none"><thead><tr><th>Producto</th><th>Uds</th><th>P.U.</th><th>Total</th><th></th></tr></thead><tbody id="p-tbody"></tbody></table>
-          <div id="p-total-row" style="display:none;padding:9px 0 0;border-top:1px solid var(--border);margin-top:3px">
-            <div class="flex jb" style="font-size:12.5px;padding:0 2px">
-              <span style="color:var(--text2)">Total</span>
+
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <div class="flex ai-c jb" style="margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text2)">Descuento</span>
+              <div class="flex ai-c gap2">
+                <input type="number" class="fc" id="np-desc" value="0" min="0" max="100" step="1" oninput="rOrderLines()" style="width:60px;padding:4px 8px;font-size:12px;text-align:right">
+                <span style="font-size:12px;color:var(--text2)">%</span>
+              </div>
+            </div>
+            <div id="p-desc-row" style="display:none" class="flex jb" style="padding:0 2px;margin-bottom:4px">
+              <span style="font-size:12px;color:var(--text2)">Dto. aplicado</span>
+              <span id="p-desc-val" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--red)"></span>
+            </div>
+            <div class="flex jb" style="padding:0 2px">
+              <span style="color:var(--text2);font-size:12.5px">Total</span>
               <span id="p-total" style="font-family:'DM Mono',monospace;color:var(--green);font-size:14px;font-weight:600">0,00 €</span>
             </div>
           </div>
@@ -892,15 +916,34 @@ function initPedido(){
 function onCli(){const id=E('np-cli').value;const el=E('np-cli-info');if(!id){el.style.display='none';return}const c=db.clientes.find(x=>x.id===id);el.textContent=c?`${c.empresa} · ${c.tel} · ${c.email}`:'';el.style.display='block'}
 function onTipo(){const t=E('np-tipo').value;E('np-mod').innerHTML='<option value="">— Selecciona modelo —</option>'+db.productos.filter(p=>p.tipo===t).map(p=>`<option value="${p.mod}">${p.mod}</option>`).join('');E('np-prod-info').style.display='none';calc()}
 function onMod(){const t=E('np-tipo').value,m=E('np-mod').value;const p=db.productos.find(x=>x.tipo===t&&x.mod===m);const el=E('np-prod-info');if(!p){el.style.display='none';return}el.textContent=[p.sexo,p.tejido,p.colores,`Coste: ${p.coste}€`].filter(Boolean).join(' · ');el.style.display='block';calc()}
+// Obtiene el tamaño resuelto: si es "custom" usa los campos W/H, si no usa el string
+function getTam(sel,wId,hId){
+  const v=E(sel).value;
+  if(!v||v==='')return null;
+  if(v==='custom'){const w=parseFloat(E(wId).value)||0,h=parseFloat(E(hId).value)||0;return(w>0&&h>0)?`${w}x${h}`:null;}
+  return v;
+}
+// Calcula coste de material para cualquier tamaño (incluso custom WxH)
+function matCTam(tipo,tam){
+  if(!tipo||!tam)return 0;
+  const mat=db.materiales.find(x=>x.tipo===tipo);if(!mat)return 0;
+  const parts=tam.split('x').map(Number);
+  if(parts.length!==2||isNaN(parts[0])||isNaN(parts[1]))return 0;
+  return pc2(mat)*parts[0]*parts[1];
+}
+function onTam1(){E('tam1-custom').style.display=E('np-tam').value==='custom'?'block':'none';calc();}
+function onTam2(){E('tam2-custom').style.display=E('np-tam2').value==='custom'?'block':'none';calc();}
 function calc(){
   const t=E('np-tipo').value,m=E('np-mod').value;
-  const m1=E('np-mat').value,tec1=E('np-tec').value,tam1=E('np-tam').value;
-  const m2=E('np-mat2').value,tec2=E('np-tec2').value,tam2=E('np-tam2').value;
+  const m1=E('np-mat').value,tec1=E('np-tec').value;
+  const m2=E('np-mat2').value,tec2=E('np-tec2').value;
+  const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
+  const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
   const tpo=parseFloat(E('np-tpo').value)||0,p=db.params;
   const prod=db.productos.find(x=>x.tipo===t&&x.mod===m);
   const cp=prod?prod.coste:null;
-  const cm1=m1&&tam1?matC(m1,tam1):null;
-  const cm2val=m2&&m2!==''&&tam2&&tam2!==''?matC(m2,tam2):0;
+  const cm1=m1&&tam1?matCTam(m1,tam1):null;
+  const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
   const sv=(id,v)=>E(id).textContent=(v!==null&&v!==undefined)?fmtn(v)+' €':'—';
@@ -915,13 +958,15 @@ function calc(){
 }
 function addLine(){
   const cid=E('np-cli').value,t=E('np-tipo').value,m=E('np-mod').value;
-  const m1=E('np-mat').value,tec1=E('np-tec').value,tam1=E('np-tam').value;
-  const m2=E('np-mat2').value,tec2=E('np-tec2').value,tam2=E('np-tam2').value;
+  const m1=E('np-mat').value,tec1=E('np-tec').value;
+  const m2=E('np-mat2').value,tec2=E('np-tec2').value;
+  const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
+  const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
   const tpo=parseFloat(E('np-tpo').value)||0,cant=parseInt(E('np-cant').value)||1;
   if(!cid||!t||!m||!m1||!tam1||!tec1){toast('Completa los campos obligatorios (Material 1, Técnica 1 y Tamaño 1)','err');return}
   const prod=db.productos.find(p=>p.tipo===t&&p.mod===m),p=db.params;
-  const cm1=matC(m1,tam1);
-  const cm2val=m2&&m2!==''&&tam2&&tam2!==''?matC(m2,tam2):0;
+  const cm1=matCTam(m1,tam1);
+  const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
   const u=prod.coste+cm1+cm2val+tinta+p.elec+p.amor+mo;
@@ -929,23 +974,37 @@ function addLine(){
   const cli=db.clientes.find(c=>c.id===cid);
   order.push({fecha:new Date().toISOString().slice(0,10),cliente:cli.nombre,tipo:t,mod:m,mat:m1,tec:tec1,tam:tam1,mat2:m2||'',tec2:tec2||'',tam2:tam2||'',cant,pu:pf,total:pf*cant,cu:u});
   rOrderLines();toast(`${t} "${m}" añadido`);
-  ['np-tipo','np-mod','np-mat','np-tec','np-tam','np-mat2','np-tec2','np-tam2'].forEach(id=>E(id).value='');
+  ['np-tipo','np-mod','np-mat','np-tec','np-tam','np-mat2','np-tec2','np-tam2','np-tam1-w','np-tam1-h','np-tam2-w','np-tam2-h'].forEach(id=>{if(E(id))E(id).value=''});
+  E('tam1-custom').style.display='none';E('tam2-custom').style.display='none';
   E('np-tpo').value='15';E('np-cant').value='1';E('np-prod-info').style.display='none';calc();
 }
 function rOrderLines(){
-  const em=E('p-empty'),tb=E('p-table'),tr=E('p-total-row');
+  const em=E('p-empty'),tb=E('p-table');
   E('p-badge').textContent=order.length+' línea'+(order.length!==1?'s':'');
-  if(!order.length){em.style.display='block';tb.style.display='none';tr.style.display='none';return}
-  em.style.display='none';tb.style.display='table';tr.style.display='block';
+  if(!order.length){em.style.display='block';tb.style.display='none';return}
+  em.style.display='none';tb.style.display='table';
   E('p-tbody').innerHTML=order.map((l,i)=>`<tr><td><div style="font-size:11px;font-weight:500">${l.tipo}</div><div style="font-size:10px;color:var(--text2)">${l.mod}</div></td><td class="tm">${l.cant}</td><td class="tm">${fmtn(l.pu)} €</td><td class="tm" style="color:var(--green)">${fmtn(l.total)} €</td><td><button class="btn btn-g" onclick="rmLine(${i})" style="color:var(--red);padding:2px 6px;font-size:11px">✕</button></td></tr>`).join('');
-  E('p-total').textContent=fmtn(order.reduce((s,l)=>s+l.total,0))+' €';
+  const subtotal=order.reduce((s,l)=>s+l.total,0);
+  const desc=Math.min(Math.max(parseFloat(E('np-desc').value)||0,0),100);
+  const dtoVal=subtotal*(desc/100);
+  const total=subtotal-dtoVal;
+  if(desc>0){
+    E('p-desc-row').style.display='flex';
+    E('p-desc-val').textContent='-'+fmtn(dtoVal)+' €';
+  } else {
+    E('p-desc-row').style.display='none';
+  }
+  E('p-total').textContent=fmtn(total)+' €';
 }
 function rmLine(i){order.splice(i,1);rOrderLines()}
-function clearOrder(){order=[];rOrderLines();toast('Pedido limpiado','inf')}
+function clearOrder(){order=[];E('np-desc').value='0';rOrderLines();toast('Pedido limpiado','inf')}
 function finalizeOrder(){
   if(!order.length){toast('Sin líneas en el pedido','err');return}
-  const tot=order.reduce((s,l)=>s+l.total,0);
-  const ben=order.reduce((s,l)=>s+(l.total-l.cu*l.cant),0);
+  const subtotal=order.reduce((s,l)=>s+l.total,0);
+  const desc=Math.min(Math.max(parseFloat(E('np-desc').value)||0,0),100);
+  const dtoVal=subtotal*(desc/100);
+  const tot=subtotal-dtoVal;
+  const ben=order.reduce((s,l)=>s+(l.total-l.cu*l.cant),0)-dtoVal;
   const id=db.nextId++;
   db.historial.push({id,fecha:new Date().toISOString().slice(0,10),cliente:order[0].cliente,total:tot,benef:ben,estado:'Presupuesto enviado'});
   order.forEach(l=>db.detalles.push({pedidoId:id,fecha:l.fecha,cliente:l.cliente,tipo:l.tipo,mod:l.mod,mat:l.mat,mat2:l.mat2||'',tam:l.tam,tec:l.tec,cant:l.cant,pu:l.pu,totLinea:l.total,costeR:l.cu*l.cant,benef:l.total-l.cu*l.cant}));
