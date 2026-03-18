@@ -377,12 +377,32 @@ tbody td{padding:10px 12px;color:var(--text)}
           <div id="np-cli-info" style="display:none;margin-top:9px;background:var(--ink3);border-radius:var(--r);padding:9px 12px;font-size:11.5px;color:var(--text2)"></div>
         </div>
         <div class="card" style="margin-bottom:12px">
-          <div class="sh-title" style="font-size:13.5px;margin-bottom:13px">② Producto</div>
-          <div class="fr" style="margin-bottom:9px">
-            <div class="fg" style="margin-bottom:0"><label class="fl">Tipo</label><select class="fc" id="np-tipo" onchange="onTipo()"><option value="">— Selecciona —</option></select></div>
-            <div class="fg" style="margin-bottom:0"><label class="fl">Modelo</label><select class="fc" id="np-mod" onchange="onMod()"><option value="">— Selecciona tipo —</option></select></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
+            <div class="sh-title" style="font-size:13.5px">② Producto</div>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11.5px;color:var(--text2);user-select:none">
+              <div style="position:relative;width:32px;height:18px;flex-shrink:0">
+                <input type="checkbox" id="np-manual-toggle" onchange="toggleManualProd()" style="opacity:0;width:0;height:0;position:absolute">
+                <div id="np-manual-track" style="position:absolute;inset:0;background:var(--border2);border-radius:99px;transition:background .15s"></div>
+                <div id="np-manual-thumb" style="position:absolute;top:3px;left:3px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .15s"></div>
+              </div>
+              Coste manual
+            </label>
           </div>
-          <div id="np-prod-info" style="display:none;background:var(--ink3);border-radius:var(--r);padding:8px 12px;font-size:11.5px;color:var(--text2)"></div>
+          <!-- Selector de catálogo -->
+          <div id="np-cat-block">
+            <div class="fr" style="margin-bottom:9px">
+              <div class="fg" style="margin-bottom:0"><label class="fl">Tipo</label><select class="fc" id="np-tipo" onchange="onTipo()"><option value="">— Selecciona —</option></select></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Modelo</label><select class="fc" id="np-mod" onchange="onMod()"><option value="">— Selecciona tipo —</option></select></div>
+            </div>
+            <div id="np-prod-info" style="display:none;background:var(--ink3);border-radius:var(--r);padding:8px 12px;font-size:11.5px;color:var(--text2)"></div>
+          </div>
+          <!-- Coste manual -->
+          <div id="np-manual-block" style="display:none">
+            <div class="fr">
+              <div class="fg" style="margin-bottom:0"><label class="fl">Descripción del producto</label><input type="text" class="fc" id="np-manual-desc" placeholder="Ej: Camiseta personalizada" oninput="calc()"></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Coste producto (€)</label><input type="number" class="fc" id="np-manual-coste" step="0.01" min="0" placeholder="0.00" oninput="calc()"></div>
+            </div>
+          </div>
         </div>
         <div class="card" style="margin-bottom:12px">
           <div class="sh-title" style="font-size:13.5px;margin-bottom:13px">③ Personalización</div>
@@ -1003,15 +1023,31 @@ function matCTam(tipo,tam){
 }
 function onTam1(){E('tam1-custom').style.display=E('np-tam').value==='custom'?'block':'none';calc();}
 function onTam2(){E('tam2-custom').style.display=E('np-tam2').value==='custom'?'block':'none';calc();}
+function toggleManualProd(){
+  const on=E('np-manual-toggle').checked;
+  E('np-cat-block').style.display=on?'none':'block';
+  E('np-manual-block').style.display=on?'block':'none';
+  // Toggle visual
+  E('np-manual-track').style.background=on?'var(--gold)':'var(--border2)';
+  E('np-manual-thumb').style.transform=on?'translateX(14px)':'none';
+  calc();
+}
 function calc(){
+  const manual=E('np-manual-toggle').checked;
   const t=E('np-tipo').value,m=E('np-mod').value;
   const m1=E('np-mat').value,tec1=E('np-tec').value;
   const m2=E('np-mat2').value,tec2=E('np-tec2').value;
   const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
   const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
   const tpo=parseFloat(E('np-tpo').value)||0,p=db.params;
-  const prod=db.productos.find(x=>x.tipo===t&&x.mod===m);
-  const cp=prod?prod.coste:null;
+  let cp=null;
+  if(manual){
+    const v=parseFloat(E('np-manual-coste').value);
+    cp=isNaN(v)?null:v;
+  } else {
+    const prod=db.productos.find(x=>x.tipo===t&&x.mod===m);
+    cp=prod?prod.coste:null;
+  }
   const cm1=m1&&tam1?matCTam(m1,tam1):null;
   const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
@@ -1027,24 +1063,38 @@ function calc(){
   E('c-unit').textContent=fmtn(u)+' €';E('c-pf').textContent=fmtn(pFin(u))+' €';
 }
 function addLine(){
-  const cid=E('np-cli').value,t=E('np-tipo').value,m=E('np-mod').value;
+  const manual=E('np-manual-toggle').checked;
+  const cid=E('np-cli').value;
   const m1=E('np-mat').value,tec1=E('np-tec').value;
   const m2=E('np-mat2').value,tec2=E('np-tec2').value;
   const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
   const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
   const tpo=parseFloat(E('np-tpo').value)||0,cant=parseInt(E('np-cant').value)||1;
-  if(!cid||!t||!m||!m1||!tam1||!tec1){toast('Completa los campos obligatorios (Material 1, Técnica 1 y Tamaño 1)','err');return}
-  const prod=db.productos.find(p=>p.tipo===t&&p.mod===m),p=db.params;
+  let t,m,cp;
+  if(manual){
+    t=E('np-manual-desc').value.trim()||'Producto manual';
+    m='';
+    cp=parseFloat(E('np-manual-coste').value);
+    if(!cid||isNaN(cp)||!m1||!tam1||!tec1){toast('Completa: coste, material, técnica y tamaño','err');return}
+  } else {
+    t=E('np-tipo').value;m=E('np-mod').value;
+    if(!cid||!t||!m||!m1||!tam1||!tec1){toast('Completa los campos obligatorios (Material 1, Técnica 1 y Tamaño 1)','err');return}
+    const prod=db.productos.find(p=>p.tipo===t&&p.mod===m);
+    if(!prod){toast('Selecciona un producto válido','err');return}
+    cp=prod.coste;
+  }
+  const p=db.params;
   const cm1=matCTam(m1,tam1);
   const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
-  const u=prod.coste+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
   const pf=pFin(u);
   const cli=db.clientes.find(c=>c.id===cid);
   order.push({fecha:new Date().toISOString().slice(0,10),cliente:cli.nombre,tipo:t,mod:m,mat:m1,tec:tec1,tam:tam1,mat2:m2||'',tec2:tec2||'',tam2:tam2||'',cant,pu:pf,total:pf*cant,cu:u});
-  rOrderLines();toast(`${t} "${m}" añadido`);
+  rOrderLines();toast(`"${t}" añadido`);
   ['np-tipo','np-mod','np-mat','np-tec','np-tam','np-mat2','np-tec2','np-tam2','np-tam1-w','np-tam1-h','np-tam2-w','np-tam2-h'].forEach(id=>{if(E(id))E(id).value=''});
+  if(manual){E('np-manual-desc').value='';E('np-manual-coste').value='';}
   E('tam1-custom').style.display='none';E('tam2-custom').style.display='none';
   E('np-tpo').value='15';E('np-cant').value='1';E('np-prod-info').style.display='none';calc();
 }
