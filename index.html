@@ -1115,7 +1115,7 @@ function addLine(){
 function rOrderLines(){
   const em=E('p-empty'),tb=E('p-table');
   E('p-badge').textContent=order.length+' línea'+(order.length!==1?'s':'');
-  if(!order.length){em.style.display='block';tb.style.display='none';return}
+  if(!order.length){em.style.display='block';tb.style.display='none';E('p-total').textContent='0,00 €';E('p-desc-row').style.display='none';return}
   em.style.display='none';tb.style.display='table';
   E('p-tbody').innerHTML=order.map((l,i)=>`<tr><td><div style="font-size:11px;font-weight:500">${l.tipo}</div><div style="font-size:10px;color:var(--text2)">${l.mod}</div></td><td class="tm">${l.cant}</td><td class="tm">${fmtn(l.pu)} €</td><td class="tm" style="color:var(--green)">${fmtn(l.total)} €</td><td><button class="btn btn-g" onclick="rmLine(${i})" style="color:var(--red);padding:2px 6px;font-size:11px">✕</button></td></tr>`).join('');
   const subtotal=order.reduce((s,l)=>s+l.total,0);
@@ -1141,7 +1141,7 @@ function finalizeOrder(){
   const ben=order.reduce((s,l)=>s+(l.total-l.cu*l.cant),0)-dtoVal;
   const id=db.nextId++;
   db.historial.push({id,fecha:new Date().toISOString().slice(0,10),cliente:order[0].cliente,total:tot,benef:ben,estado:'Presupuesto enviado'});
-  order.forEach(l=>db.detalles.push({pedidoId:id,fecha:l.fecha,cliente:l.cliente,tipo:l.tipo,mod:l.mod,mat:l.mat,mat2:l.mat2||'',tam:l.tam,tec:l.tec,cant:l.cant,pu:l.pu,totLinea:l.total,costeR:l.cu*l.cant,benef:l.total-l.cu*l.cant}));
+  order.forEach(l=>db.detalles.push({pedidoId:id,fecha:l.fecha,cliente:l.cliente,tipo:l.tipo,mod:l.mod,mat:l.mat,tec:l.tec,tam:l.tam,mat2:l.mat2||'',tec2:l.tec2||'',tam2:l.tam2||'',cant:l.cant,pu:l.pu,totLinea:l.total,costeR:l.cu*l.cant,benef:l.total-l.cu*l.cant}));
   saveDB();
   addNotif(`Pedido #${id} creado`,`${order[0].cliente} · ${fmt(tot)}`,'ok');
   order=[];rOrderLines();
