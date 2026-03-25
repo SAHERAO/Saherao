@@ -1235,8 +1235,14 @@ function delPedido(id){
   confirm2(`Eliminar Pedido #${id}`,`¿Eliminar el pedido de ${p.cliente} por ${fmt(p.total)}? No se puede deshacer.`,()=>{
     db.historial=db.historial.filter(x=>x.id!==id);
     db.detalles=db.detalles.filter(x=>x.pedidoId!==id);
+    // Renumerar pedidos para que la numeración quede continua
+    const sorted=db.historial.sort((a,b)=>a.id-b.id);
+    const idMap={};
+    sorted.forEach((ped,i)=>{idMap[ped.id]=i+1;ped.id=i+1;});
+    db.detalles.forEach(d=>{if(idMap[d.pedidoId]!==undefined)d.pedidoId=idMap[d.pedidoId];});
+    db.nextId=sorted.length+1;
     saveDB();rHist();E('h-det').style.display='none';
-    toast('Pedido eliminado','inf');
+    toast('Pedido eliminado · numeración reestablecida','inf');
     addNotif(`Pedido #${id} eliminado`,`${p.cliente} · ${fmt(p.total)}`,'del');
   });
 }
