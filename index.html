@@ -342,14 +342,30 @@ tbody td{padding:10px 12px;color:var(--text)}
 
   <!-- DASHBOARD -->
   <div class="page active" id="p-dashboard">
+    <!-- KPIs fila 1: métricas del mes actual con comparativa -->
+    <div style="margin-bottom:8px;font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--text2)" id="k-mes-lbl">Mes actual</div>
+    <div class="g4" style="margin-bottom:6px">
+      <div class="kpi c-gold"><div class="kpi-ico">€</div><div class="kpi-lbl">Facturación mes</div><div class="kpi-val" id="k-fact-mes">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-fact-mes-sub">—</div></div>
+      <div class="kpi c-green"><div class="kpi-ico">↑</div><div class="kpi-lbl">Beneficio mes</div><div class="kpi-val" id="k-benef-mes">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-benef-mes-sub">—</div></div>
+      <div class="kpi c-orange"><div class="kpi-ico">#</div><div class="kpi-lbl">Pedidos mes</div><div class="kpi-val" id="k-ped-mes">0</div><div class="kpi-sub" id="k-ped-mes-sub">—</div></div>
+      <div class="kpi c-blue"><div class="kpi-ico">⌀</div><div class="kpi-lbl">Ticket medio mes</div><div class="kpi-val" id="k-tick-mes">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-tick-mes-sub">—</div></div>
+    </div>
+    <!-- KPIs fila 2: acumulados totales + conversión -->
+    <div style="margin-bottom:8px;margin-top:14px;font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--text2)">Acumulado total</div>
     <div class="g4" style="margin-bottom:16px">
-      <div class="kpi c-gold"><div class="kpi-ico">€</div><div class="kpi-lbl">Facturación Total</div><div class="kpi-val" id="k-fact">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-fact-sub">—</div></div>
-      <div class="kpi c-green"><div class="kpi-ico">↑</div><div class="kpi-lbl">Beneficio Total</div><div class="kpi-val" id="k-benef">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-benef-sub">—</div></div>
-      <div class="kpi c-orange"><div class="kpi-ico">#</div><div class="kpi-lbl">Pedidos</div><div class="kpi-val" id="k-ped">0</div><div class="kpi-sub" id="k-ped-sub">—</div></div>
-      <div class="kpi c-blue"><div class="kpi-ico">⌀</div><div class="kpi-lbl">Ticket Medio</div><div class="kpi-val" id="k-tick">0,00 <sup>€</sup></div><div class="kpi-sub">Por pedido</div></div>
+      <div class="kpi c-gold"><div class="kpi-ico">€</div><div class="kpi-lbl">Facturación total</div><div class="kpi-val" id="k-fact">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-fact-sub">—</div></div>
+      <div class="kpi c-green"><div class="kpi-ico">↑</div><div class="kpi-lbl">Beneficio total</div><div class="kpi-val" id="k-benef">0,00 <sup>€</sup></div><div class="kpi-sub" id="k-benef-sub">—</div></div>
+      <div class="kpi c-orange"><div class="kpi-ico">#</div><div class="kpi-lbl">Pedidos totales</div><div class="kpi-val" id="k-ped">0</div><div class="kpi-sub" id="k-ped-sub">—</div></div>
+      <div class="kpi c-blue"><div class="kpi-ico">◎</div><div class="kpi-lbl">Tasa conversión</div><div class="kpi-val" id="k-conv">0 <sup>%</sup></div><div class="kpi-sub" id="k-conv-sub">—</div></div>
     </div>
     <div class="g2" style="margin-bottom:14px">
-      <div class="card"><div class="sh"><div><div class="sh-title" style="font-size:14px">Facturación mensual</div><div class="sh-sub">Últimos 12 meses · barras=ventas, línea=beneficio</div></div><select class="fc" id="d-year" onchange="rChartM()" style="width:80px;font-size:11.5px;padding:4px 7px"></select></div><div style="position:relative;height:200px"><canvas id="ch-mens"></canvas></div></div>
+      <div class="card">
+        <div class="sh">
+          <div><div class="sh-title" style="font-size:14px">Facturación mensual</div><div class="sh-sub" id="ch-mens-sub">Barras = ventas · Línea = beneficio</div></div>
+          <select class="fc" id="d-year" onchange="rChartM()" style="width:80px;font-size:11.5px;padding:4px 7px"></select>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="ch-mens"></canvas></div>
+      </div>
       <div class="card"><div class="sh"><div><div class="sh-title" style="font-size:14px">Ventas por tipo</div><div class="sh-sub">Facturación acumulada</div></div></div><div style="position:relative;height:200px"><canvas id="ch-prod"></canvas></div></div>
     </div>
     <div class="g3" style="margin-bottom:14px">
@@ -357,10 +373,17 @@ tbody td{padding:10px 12px;color:var(--text)}
       <div class="card"><div class="sh" style="margin-bottom:12px"><div class="sh-title" style="font-size:13.5px">Top clientes</div></div><div id="top-cli"></div></div>
       <div class="card"><div class="sh" style="margin-bottom:12px"><div class="sh-title" style="font-size:13.5px">Margen por técnica</div></div><div id="top-tec"></div></div>
     </div>
-    <div class="card">
-      <div class="sh"><div class="sh-title" style="font-size:14px">Últimos pedidos</div><button class="btn btn-g btn-sm" onclick="go('historial')">Ver todos →</button></div>
-      <div class="tw"><table><thead><tr><th>Nº</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Beneficio</th><th>Margen</th><th>Estado</th><th></th></tr></thead><tbody id="d-ult"></tbody></table></div>
-      <div id="d-ult-empty" class="empty" style="display:none"><div class="empty-ico">◉</div><div class="empty-title">Sin pedidos todavía</div></div>
+    <!-- Fila inferior: pendientes de cobro + alertas -->
+    <div class="g2">
+      <div class="card">
+        <div class="sh"><div class="sh-title" style="font-size:14px">Pendientes de cobro</div><button class="btn btn-g btn-sm" onclick="go('historial')">Ver todos →</button></div>
+        <div class="tw"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody id="d-pend"></tbody></table></div>
+        <div id="d-pend-empty" class="empty" style="display:none"><div class="empty-ico">✓</div><div class="empty-title">Todo cobrado</div><div>No hay pedidos pendientes</div></div>
+      </div>
+      <div class="card">
+        <div class="sh" style="margin-bottom:12px"><div class="sh-title" style="font-size:14px">Alertas y resumen</div></div>
+        <div id="d-alertas"></div>
+      </div>
     </div>
   </div>
 
@@ -937,29 +960,82 @@ function timeAgo(iso){
 let chM=null,chP=null,chE=null;
 function rDash(){
   const h=db.historial;
+  const now=new Date();
+  const curY=now.getFullYear(),curM=now.getMonth();
+  const prevY=curM===0?curY-1:curY, prevM=curM===0?11:curM-1;
+
+  const pedMes  =h.filter(p=>{const d=new Date(p.fecha);return d.getFullYear()===curY&&d.getMonth()===curM});
+  const pedPrev =h.filter(p=>{const d=new Date(p.fecha);return d.getFullYear()===prevY&&d.getMonth()===prevM});
+
+  const fMes =pedMes.reduce((s,p)=>s+(p.total||0),0);
+  const fPrev=pedPrev.reduce((s,p)=>s+(p.total||0),0);
+  const bMes =pedMes.reduce((s,p)=>s+(p.benef||0),0);
+  const bPrev=pedPrev.reduce((s,p)=>s+(p.benef||0),0);
+  const nMes =pedMes.length, nPrev=pedPrev.length;
+  const tMes =nMes?fMes/nMes:0, tPrev=nPrev?fPrev/nPrev:0;
+
+  function delta(cur,prev){
+    if(!prev)return cur>0?'<span style="color:var(--green)">Nuevo ↑</span>':'—';
+    const pct=((cur-prev)/prev*100);
+    const col=pct>=0?'var(--green)':'var(--red)';
+    const arr=pct>=0?'↑':'↓';
+    return`<span style="color:${col}">${arr} ${Math.abs(pct).toFixed(1)}% vs mes ant.</span>`;
+  }
+  const mesNombre=now.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  E('k-mes-lbl').textContent=mesNombre.charAt(0).toUpperCase()+mesNombre.slice(1);
+  E('k-fact-mes').innerHTML=fmtn(fMes)+' <sup>€</sup>';
+  E('k-fact-mes-sub').innerHTML=delta(fMes,fPrev);
+  E('k-benef-mes').innerHTML=fmtn(bMes)+' <sup>€</sup>';
+  E('k-benef-mes-sub').innerHTML=delta(bMes,bPrev);
+  E('k-ped-mes').textContent=nMes;
+  E('k-ped-mes-sub').innerHTML=delta(nMes,nPrev);
+  E('k-tick-mes').innerHTML=fmtn(tMes)+' <sup>€</sup>';
+  E('k-tick-mes-sub').innerHTML=delta(tMes,tPrev);
+
+  // Acumulados totales
   const tF=h.reduce((s,p)=>s+(p.total||0),0);
   const tB=h.reduce((s,p)=>s+(p.benef||0),0);
   const marg=tF>0?(tB/tF*100):0;
-  const tick=h.length?tF/h.length:0;
   const pend=h.filter(p=>!['Cobrado','Terminado'].includes(p.estado)).length;
   E('k-fact').innerHTML=fmtn(tF)+' <sup>€</sup>';
-  E('k-fact-sub').textContent='Todos los pedidos';
+  E('k-fact-sub').textContent=h.length+' pedidos en total';
   E('k-benef').innerHTML=fmtn(tB)+' <sup>€</sup>';
-  E('k-benef-sub').innerHTML=`<span style="color:${marg>30?'var(--green)':'var(--text2)'}">${marg.toFixed(1)}%</span> margen`;
+  E('k-benef-sub').innerHTML=`<span style="color:${marg>30?'var(--green)':'var(--text2)'}">${marg.toFixed(1)}%</span> margen global`;
   E('k-ped').textContent=h.length;
   E('k-ped-sub').textContent=pend+' pendientes de cobro';
-  E('k-tick').innerHTML=fmtn(tick)+' <sup>€</sup>';
+
+  // Tasa de conversión: cobrados / total
+  const cobrados=h.filter(p=>p.estado==='Cobrado').length;
+  const conv=h.length?Math.round(cobrados/h.length*100):0;
+  E('k-conv').innerHTML=conv+' <sup>%</sup>';
+  E('k-conv-sub').innerHTML=`${cobrados} cobrados de ${h.length} — <span style="color:${conv>60?'var(--green)':conv>30?'var(--gold)':'var(--red)'}">${conv>=60?'Buena':'Mejorable'}</span>`;
+
+  // Selector de año
   const yrs=[...new Set(h.map(p=>new Date(p.fecha).getFullYear()))].sort((a,b)=>b-a);
   const sel=E('d-year');const cv=sel.value;
   sel.innerHTML='<option value="">Todos</option>'+yrs.map(y=>`<option ${y==cv?'selected':''}>${y}</option>`).join('');
-  rChartM();rChartP();rChartE();rTopCli();rTopTec();rDashUlt();
+
+  rChartM();rChartP();rChartE();rTopCli();rTopTec();rDashPend();rDashAlertas();
 }
 function rChartM(){
   const yf=E('d-year')?.value;
-  const months=[];const now=new Date();
-  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({label:d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}),key:`${d.getFullYear()}-${d.getMonth()}`})}
-  const data=months.map(m=>db.historial.filter(p=>{const d=new Date(p.fecha);if(yf&&d.getFullYear()!=yf)return false;return`${d.getFullYear()}-${d.getMonth()}`===m.key}).reduce((s,p)=>s+(p.total||0),0));
-  const benef=months.map(m=>db.historial.filter(p=>{const d=new Date(p.fecha);return`${d.getFullYear()}-${d.getMonth()}`===m.key}).reduce((s,p)=>s+(p.benef||0),0));
+  const now=new Date();
+  let months=[];
+  if(yf){
+    // Año seleccionado: mostrar los 12 meses de ese año
+    for(let i=0;i<12;i++){
+      const d=new Date(yf,i,1);
+      months.push({label:d.toLocaleDateString('es-ES',{month:'short'}),key:`${yf}-${i}`});
+    }
+    E('ch-mens-sub').textContent=`Año ${yf} · barras = ventas · línea = beneficio`;
+  } else {
+    // Sin filtro: últimos 12 meses rodantes
+    for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({label:d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}),key:`${d.getFullYear()}-${d.getMonth()}`})}
+    E('ch-mens-sub').textContent='Últimos 12 meses · barras = ventas · línea = beneficio';
+  }
+  const filtrar=p=>{const d=new Date(p.fecha);return`${d.getFullYear()}-${d.getMonth()}`};
+  const data  =months.map(m=>db.historial.filter(p=>filtrar(p)===m.key).reduce((s,p)=>s+(p.total||0),0));
+  const benef =months.map(m=>db.historial.filter(p=>filtrar(p)===m.key).reduce((s,p)=>s+(p.benef||0),0));
   const ctx=E('ch-mens').getContext('2d');if(chM)chM.destroy();
   chM=new Chart(ctx,{type:'bar',data:{labels:months.map(m=>m.label),datasets:[
     {label:'Facturación',data,backgroundColor:'rgba(201,168,76,.6)',borderColor:'#c9a84c',borderWidth:1,borderRadius:3,order:2},
@@ -997,12 +1073,53 @@ function rTopTec(){
   if(!s.length){el.innerHTML='<div class="empty" style="padding:16px"><div class="empty-ico">◪</div><div>Sin datos</div></div>';return}
   el.innerHTML=s.map(r=>`<div style="padding:7px 0;border-bottom:1px solid rgba(37,37,37,.6)"><div class="flex jb" style="margin-bottom:4px"><span style="font-size:12px">${r.t}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:${r.m>35?'var(--green)':'var(--text2)'}">${r.m.toFixed(1)}%</span></div><div class="pb"><div class="pf" style="background:${r.m>35?'var(--green)':'var(--gold)'};width:${Math.min(r.m,100).toFixed(0)}%"></div></div></div>`).join('');
 }
-function rDashUlt(){
-  const s=[...db.historial].sort((a,b)=>b.id-a.id).slice(0,6);
-  const tb=E('d-ult'),em=E('d-ult-empty');
-  if(!s.length){tb.innerHTML='';em.style.display='block';return}
+function rDashPend(){
+  const pend=[...db.historial].filter(p=>!['Cobrado','Terminado'].includes(p.estado)).sort((a,b)=>a.id-b.id);
+  const tb=E('d-pend'),em=E('d-pend-empty');
+  if(!pend.length){tb.innerHTML='';em.style.display='block';return}
   em.style.display='none';
-  tb.innerHTML=s.map(p=>{const m=p.total>0?((p.benef||0)/p.total*100):0;return`<tr onclick="go('historial');setTimeout(()=>showDet(${p.id}),120)" style="cursor:pointer"><td class="tm" style="color:var(--text2)">#${p.id}</td><td style="color:var(--text2)">${fmtD(p.fecha)}</td><td>${p.cliente}</td><td class="tm" style="color:var(--gold)">${fmt(p.total)}</td><td class="tm" style="color:var(--green)">${fmt(p.benef)}</td><td class="tm" style="color:var(--text2)">${m.toFixed(1)}%</td><td>${badge(p.estado)}</td><td><button class="btn btn-g btn-xs" onclick="event.stopPropagation();go('historial');setTimeout(()=>showDet(${p.id}),120)">Ver →</button></td></tr>`}).join('');
+  tb.innerHTML=pend.map(p=>`<tr onclick="go('historial');setTimeout(()=>showDet(${p.id}),120)" style="cursor:pointer">
+    <td class="tm" style="color:var(--text2)">#${p.id}</td>
+    <td style="font-weight:500">${p.cliente}</td>
+    <td class="tm" style="color:var(--gold)">${fmt(p.total)}</td>
+    <td>${badge(p.estado)}</td>
+    <td><button class="btn btn-g btn-xs" onclick="event.stopPropagation();go('historial');setTimeout(()=>showDet(${p.id}),120)">Ver →</button></td>
+  </tr>`).join('');
+}
+function rDashAlertas(){
+  const el=E('d-alertas');
+  const alerts=[];
+  const h=db.historial;
+  // Pedidos en estado "Presupuesto enviado" hace más de 7 días sin respuesta
+  const hoy=Date.now();
+  h.filter(p=>p.estado==='Presupuesto enviado').forEach(p=>{
+    const dias=Math.floor((hoy-new Date(p.fecha).getTime())/86400000);
+    if(dias>=7)alerts.push({tipo:'warn',ico:'⏱',msg:`Pedido #${p.id} (${p.cliente}) lleva <strong>${dias} días</strong> sin respuesta`,pid:p.id});
+  });
+  // Pedidos "Terminado" sin cobrar
+  h.filter(p=>p.estado==='Terminado').forEach(p=>{
+    alerts.push({tipo:'gold',ico:'💶',msg:`Pedido #${p.id} (${p.cliente}) terminado y pendiente de cobro · <strong>${fmt(p.total)}</strong>`,pid:p.id});
+  });
+  // Pedidos "En proceso" (recordatorio)
+  h.filter(p=>p.estado==='En proceso').forEach(p=>{
+    alerts.push({tipo:'blue',ico:'⚙',msg:`Pedido #${p.id} (${p.cliente}) en producción · <strong>${fmt(p.total)}</strong>`,pid:p.id});
+  });
+  // Resumen mes si hay datos
+  const now=new Date();
+  const pedMes=h.filter(p=>{const d=new Date(p.fecha);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()});
+  if(pedMes.length){
+    const fMes=pedMes.reduce((s,p)=>s+(p.total||0),0);
+    const bMes=pedMes.reduce((s,p)=>s+(p.benef||0),0);
+    const mMes=fMes>0?(bMes/fMes*100):0;
+    alerts.unshift({tipo:'green',ico:'📊',msg:`Este mes: <strong>${pedMes.length} pedidos</strong>, <strong>${fmt(fMes)}</strong> facturado, margen <strong>${mMes.toFixed(1)}%</strong>`,pid:null});
+  }
+  if(!alerts.length){el.innerHTML='<div class="empty" style="padding:20px"><div class="empty-ico" style="font-size:22px">✓</div><div class="empty-title">Todo en orden</div><div>Sin alertas activas</div></div>';return}
+  const colMap={warn:'var(--orange)',gold:'var(--gold)',blue:'var(--blue)',green:'var(--green)',red:'var(--red)'};
+  el.innerHTML=alerts.map(a=>`<div onclick="${a.pid?`go('historial');setTimeout(()=>showDet(${a.pid}),120)`:''}" style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(37,37,37,.6);${a.pid?'cursor:pointer':''}">
+    <span style="font-size:14px;margin-top:1px;flex-shrink:0">${a.ico}</span>
+    <span style="font-size:12px;color:var(--text2);line-height:1.5">${a.msg}</span>
+    ${a.pid?`<button class="btn btn-g btn-xs" style="margin-left:auto;flex-shrink:0" onclick="event.stopPropagation();go('historial');setTimeout(()=>showDet(${a.pid}),120)">Ver →</button>`:''}
+  </div>`).join('');
 }
 
 // ── NUEVO PEDIDO ─────────────────────────────────────────────
