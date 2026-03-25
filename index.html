@@ -530,13 +530,27 @@ tbody td{padding:10px 12px;color:var(--text)}
       </div>
       <div class="tw">
         <table>
-          <thead><tr><th>Tipo</th><th>Modelo</th><th>Material</th><th>Tamaño</th><th>Técnica</th><th>Uds</th><th>P.Unit</th><th>Total</th><th>Coste</th><th>Beneficio</th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Modelo</th><th>Pers. 1</th><th>Pers. 2</th><th>Uds</th><th>Coste U.</th><th>P.Unit</th><th>Total línea</th><th>Coste total</th><th>Beneficio</th><th>Margen</th></tr></thead>
           <tbody id="h-det-body"></tbody>
         </table>
       </div>
-      <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:18px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Total pedido</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--gold)" id="det-tot"></div></div>
-        <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Beneficio</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--green)" id="det-ben"></div></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px">
+          <div id="det-notas-block" style="display:none;flex:1;min-width:200px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:4px">Notas internas</div>
+            <textarea id="det-notas" class="fc" rows="2" style="font-size:12px;resize:vertical" placeholder="Notas internas del pedido..." oninput="saveNotas()"></textarea>
+          </div>
+          <div style="display:flex;gap:18px;justify-content:flex-end;margin-left:auto">
+            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Descuento</div><div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--red)" id="det-dto">—</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Coste total</div><div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text2)" id="det-coste">—</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Total pedido</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--gold)" id="det-tot"></div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Beneficio</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--green)" id="det-ben"></div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Margen</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--blue)" id="det-marg">—</div></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-g btn-xs" onclick="toggleNotas()" style="color:var(--text2)">📝 Notas internas</button>
+        </div>
       </div>
     </div>
   </div>
@@ -844,7 +858,7 @@ const fmtn = n => (isNaN(n)||n==null)?'—':n.toLocaleString('es-ES',{minimumFra
 const fmtD = d => d?new Date(d).toLocaleDateString('es-ES'):'—';
 const pc2  = m => (m.ancho*m.largo*m.uds)>0?m.coste/(m.ancho*m.largo*m.uds):0;
 const matC = (t,s) => { const m=db.materiales.find(x=>x.tipo===t); if(!m||!s)return 0; const [w,h]=s.split('x').map(Number); return pc2(m)*w*h; };
-const pFin = u => { const p=u*(1+db.params.margen); return Math.floor(p)+0.9+(Math.floor(p)+0.9<p?1:0); };
+const pFin = u => { const minP=u*(1+db.params.margen); const candidate=Math.floor(minP)+0.9; return candidate>=minP?candidate:candidate+1; };
 
 function badge(e){
   const m={'Presupuesto enviado':'env','Presupuesto aceptado':'ace','En proceso':'pro','Terminado':'ter','Cobrado':'cob'};
@@ -1167,18 +1181,48 @@ function showDet(id){
   E('h-det').style.display='block';
   E('h-det-title').textContent=`Pedido #${ped.id} — ${ped.cliente}`;
   E('h-det-sub').textContent=fmtD(ped.fecha);
-  E('det-tot').textContent=fmt(ped.total);E('det-ben').textContent=fmt(ped.benef);
+  E('det-tot').textContent=fmt(ped.total);
+  E('det-ben').textContent=fmt(ped.benef);
+  const marg=ped.total>0?((ped.benef||0)/ped.total*100):0;
+  E('det-marg').textContent=marg.toFixed(1)+'%';
+  E('det-marg').style.color=marg>30?'var(--green)':marg>15?'var(--gold)':'var(--red)';
+  // Calcular coste total y posible descuento
+  const cosTotal=dets.reduce((s,d)=>s+(d.costeR||0),0);
+  const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
+  const dto=subtotal-ped.total;
+  E('det-coste').textContent=fmt(cosTotal);
+  E('det-dto').textContent=dto>0.01?'-'+fmt(dto):'—';
+  // Notas
+  const notas=ped.notas||'';
+  const notasEl=E('det-notas');if(notasEl)notasEl.value=notas;
   const ests=['Presupuesto enviado','Presupuesto aceptado','En proceso','Terminado','Cobrado'];
   const sel=E('h-est-sel');sel.innerHTML=ests.map(e=>`<option ${e===ped.estado?'selected':''}>${e}</option>`).join('');sel.dataset.pid=id;
-  E('h-det-body').innerHTML=dets.map(d=>`<tr>
-    <td>${d.tipo}</td><td style="color:var(--text2);font-size:11.5px">${d.mod}</td>
-    <td style="color:var(--text2);font-size:11.5px">${d.mat}</td>
-    <td>${d.tam}</td><td>${d.tec}</td><td class="tm">${d.cant}</td>
-    <td class="tm">${fmt(d.pu)}</td><td class="tm" style="color:var(--gold)">${fmt(d.totLinea)}</td>
+  E('h-det-body').innerHTML=dets.map(d=>{
+    const cu=d.cant>0?(d.costeR/d.cant):0;
+    const lmarg=d.totLinea>0?((d.benef||0)/d.totLinea*100):0;
+    const pers1=[d.mat,d.tec,d.tam].filter(Boolean).join(' · ')||'—';
+    const pers2=[d.mat2,d.tec2,d.tam2].filter(Boolean).join(' · ')||'';
+    return`<tr>
+    <td><div style="font-weight:500">${d.tipo}</div></td>
+    <td style="color:var(--text2);font-size:11.5px">${d.mod||'—'}</td>
+    <td style="font-size:11.5px">${pers1}</td>
+    <td style="font-size:11px;color:var(--text2)">${pers2||'—'}</td>
+    <td class="tm">${d.cant}</td>
+    <td class="tm" style="color:var(--text2)">${fmt(cu)}</td>
+    <td class="tm">${fmt(d.pu)}</td>
+    <td class="tm" style="color:var(--gold)">${fmt(d.totLinea)}</td>
     <td class="tm" style="color:var(--text2)">${fmt(d.costeR)}</td>
     <td class="tm" style="color:var(--green)">${fmt(d.benef)}</td>
-  </tr>`).join('');
+    <td class="tm" style="color:${lmarg>30?'var(--green)':lmarg>15?'var(--gold)':'var(--red)'}">${lmarg.toFixed(1)}%</td>
+  </tr>`;}).join('');
   E('h-det').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function toggleNotas(){
+  const b=E('det-notas-block');b.style.display=b.style.display==='none'?'block':'none';
+}
+function saveNotas(){
+  const ped=db.historial.find(p=>p.id===currentPedidoId);
+  if(ped){ped.notas=E('det-notas').value;saveDB();}
 }
 function changeStatus(){
   const sel=E('h-est-sel'),id=parseInt(sel.dataset.pid),ped=db.historial.find(p=>p.id===id);
@@ -1203,26 +1247,68 @@ function showPDF(){
   const ped=db.historial.find(p=>p.id===id),dets=db.detalles.filter(d=>d.pedidoId===id);
   const cli=db.clientes.find(c=>c.nombre===ped.cliente);
   const hoy=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
+  const dto=subtotal-ped.total;
+  const lineasHTML=dets.map(d=>{
+    const pers1=[d.mat,d.tec,d.tam].filter(Boolean).join(' · ')||'—';
+    const pers2=[d.mat2,d.tec2,d.tam2].filter(Boolean).join(' · ')||'';
+    return`<tr>
+      <td><strong style="font-size:13px">${d.tipo}</strong><div style="font-size:11px;color:#666;margin-top:1px">${d.mod||''}</div></td>
+      <td style="font-size:12px;color:#444">${pers1}${pers2?`<div style="font-size:11px;color:#888;margin-top:1px">+ ${pers2}</div>`:''}</td>
+      <td style="text-align:center;font-size:12.5px">${d.cant}</td>
+      <td style="text-align:right;font-family:monospace;font-size:12.5px">${fmt(d.pu)}</td>
+      <td style="text-align:right;font-family:monospace;font-size:13px;font-weight:600">${fmt(d.totLinea)}</td>
+    </tr>`;}).join('');
   E('pdf-content').innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px">
-      <div><h1 style="font-size:24px;margin-bottom:3px">SAHERAO</h1><div style="font-size:11.5px;color:#777">Personalización textil y merchandising</div></div>
-      <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:#111;margin-bottom:3px">PRESUPUESTO #${ped.id}</div><div style="font-size:12px;color:#666">Fecha: ${hoy}</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
-      <div style="background:#f8f8f8;border-radius:6px;padding:13px"><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:#aaa;margin-bottom:5px">Cliente</div>
-        <div style="font-weight:600;font-size:14px">${ped.cliente}</div>
-        ${cli?`<div style="font-size:12px;color:#666;margin-top:2px">${cli.empresa}</div><div style="font-size:12px;color:#666">${cli.tel}</div><div style="font-size:12px;color:#666">${cli.email}</div>`:''}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid #1a1a1a">
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#1a1a1a;letter-spacing:.02em">SAHERAO</div>
+        <div style="font-size:11px;color:#888;margin-top:2px;letter-spacing:.05em;text-transform:uppercase">Personalización textil · Merchandising</div>
       </div>
-      <div style="background:#f8f8f8;border-radius:6px;padding:13px"><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:#aaa;margin-bottom:5px">Detalles</div>
-        <div style="font-size:12px;color:#666">Fecha: <strong style="color:#111">${fmtD(ped.fecha)}</strong></div>
-        <div style="font-size:12px;color:#666">Estado: <strong style="color:#111">${ped.estado}</strong></div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:700;color:#1a1a1a">PRESUPUESTO</div>
+        <div style="font-family:monospace;font-size:15px;color:#555;margin-top:2px">#${String(ped.id).padStart(4,'0')}</div>
+        <div style="font-size:11.5px;color:#888;margin-top:4px">Emitido: ${hoy}</div>
+        <div style="font-size:11.5px;color:#888">Válido hasta: ${new Date(new Date().setDate(new Date().getDate()+30)).toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'})}</div>
       </div>
     </div>
-    <table><thead><tr><th>Producto</th><th>Material</th><th>Tamaño</th><th>Técnica</th><th style="text-align:center">Uds</th><th style="text-align:right">P.Unit</th><th style="text-align:right">Total</th></tr></thead>
-    <tbody>${dets.map(d=>`<tr><td>${d.tipo}<div style="font-size:11px;color:#888">${d.mod}</div></td><td style="font-size:12px;color:#666">${d.mat}</td><td style="font-size:12px">${d.tam}</td><td style="font-size:12px">${d.tec}</td><td style="text-align:center">${d.cant}</td><td style="text-align:right;font-family:monospace">${fmt(d.pu)}</td><td style="text-align:right;font-family:monospace;font-weight:600">${fmt(d.totLinea)}</td></tr>`).join('')}
-    <tr class="tr-tot"><td colspan="5" style="text-align:right;font-size:12px;color:#666">TOTAL</td><td></td><td style="text-align:right;font-family:monospace;font-size:15px">${fmt(ped.total)}</td></tr>
-    </tbody></table>
-    <div style="margin-top:24px;padding-top:13px;border-top:1px solid #eee;font-size:10.5px;color:#aaa;text-align:center">Presupuesto válido 30 días · SAHERAO · Personalización textil y merchandising</div>`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+      <div style="background:#f8f8f8;border-radius:6px;padding:14px;border-left:3px solid #1a1a1a">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#aaa;margin-bottom:7px;font-weight:600">Datos del cliente</div>
+        <div style="font-weight:700;font-size:15px;color:#111">${ped.cliente}</div>
+        ${cli&&cli.empresa&&cli.empresa!=='Particular'?`<div style="font-size:12px;color:#555;margin-top:2px">${cli.empresa}</div>`:''}
+        ${cli&&cli.dir?`<div style="font-size:12px;color:#666;margin-top:3px">📍 ${cli.dir}</div>`:''}
+        ${cli&&cli.tel?`<div style="font-size:12px;color:#666;margin-top:2px">📞 ${cli.tel}</div>`:''}
+        ${cli&&cli.email?`<div style="font-size:12px;color:#666;margin-top:2px">✉ ${cli.email}</div>`:''}
+      </div>
+      <div style="background:#f8f8f8;border-radius:6px;padding:14px;border-left:3px solid #c9a84c">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#aaa;margin-bottom:7px;font-weight:600">Detalles del presupuesto</div>
+        <div style="font-size:12px;color:#666;margin-bottom:3px">Nº presupuesto: <strong style="color:#111">#${String(ped.id).padStart(4,'0')}</strong></div>
+        <div style="font-size:12px;color:#666;margin-bottom:3px">Fecha pedido: <strong style="color:#111">${fmtD(ped.fecha)}</strong></div>
+        <div style="font-size:12px;color:#666;margin-bottom:3px">Estado: <strong style="color:#111">${ped.estado}</strong></div>
+        <div style="font-size:12px;color:#666">Unidades totales: <strong style="color:#111">${dets.reduce((s,d)=>s+(d.cant||0),0)}</strong></div>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Producto / Descripción</th>
+        <th>Personalización</th>
+        <th style="text-align:center">Uds</th>
+        <th style="text-align:right">Precio unit.</th>
+        <th style="text-align:right">Total</th>
+      </tr></thead>
+      <tbody>
+        ${lineasHTML}
+        ${subtotal!==ped.total?`<tr><td colspan="4" style="text-align:right;font-size:12px;color:#666;padding:8px 11px">Subtotal</td><td style="text-align:right;font-family:monospace;padding:8px 11px">${fmt(subtotal)}</td></tr>
+        <tr><td colspan="4" style="text-align:right;font-size:12px;color:#c00;padding:4px 11px">Descuento</td><td style="text-align:right;font-family:monospace;color:#c00;padding:4px 11px">- ${fmt(dto)}</td></tr>`:''}
+        <tr class="tr-tot"><td colspan="4" style="text-align:right;font-size:12px;color:#333">TOTAL</td><td style="text-align:right;font-family:monospace;font-size:16px">${fmt(ped.total)}</td></tr>
+      </tbody>
+    </table>
+    ${ped.notas?`<div style="margin-top:18px;background:#fffbf0;border:1px solid #e8d89a;border-radius:6px;padding:12px 14px"><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:#b09030;margin-bottom:5px;font-weight:600">Notas</div><div style="font-size:12.5px;color:#444;line-height:1.6">${ped.notas}</div></div>`:''}
+    <div style="margin-top:28px;padding-top:14px;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:10.5px;color:#aaa">SAHERAO · Personalización textil y merchandising</div>
+      <div style="font-size:10.5px;color:#aaa">Presupuesto válido 30 días desde la fecha de emisión</div>
+    </div>`;
   openM('m-pdf');
 }
 function printPDF(){
