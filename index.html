@@ -547,13 +547,14 @@ tbody td{padding:10px 12px;color:var(--text)}
       <div class="sh" style="margin-bottom:14px">
         <div><div class="sh-title" style="font-size:14px" id="h-det-title">Detalle</div><div class="sh-sub" id="h-det-sub"></div></div>
         <div class="flex gap2">
+          <button class="btn btn-s btn-sm" onclick="openAddLinea()">+ Añadir línea</button>
           <select class="fc" id="h-est-sel" onchange="changeStatus()" style="width:180px;font-size:12px;padding:6px 10px"></select>
           <button class="btn btn-green btn-sm" onclick="showPDF()">↓ PDF</button>
         </div>
       </div>
       <div class="tw">
         <table>
-          <thead><tr><th>Tipo</th><th>Modelo</th><th>Pers. 1</th><th>Pers. 2</th><th>Uds</th><th>Coste U.</th><th>P.Unit</th><th>Total línea</th><th>Coste total</th><th>Beneficio</th><th>Margen</th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Modelo</th><th>Pers. 1</th><th>Pers. 2</th><th>Uds</th><th>Coste U.</th><th>P.Unit</th><th>Total línea</th><th>Coste total</th><th>Beneficio</th><th>Margen</th><th></th></tr></thead>
           <tbody id="h-det-body"></tbody>
         </table>
       </div>
@@ -739,6 +740,81 @@ tbody td{padding:10px 12px;color:var(--text)}
   <div class="md md-lg" style="width:640px">
     <div class="mh"><div class="mt-title">Presupuesto — Vista previa</div><div class="flex gap2"><button class="btn btn-green btn-sm" onclick="printPDF()">↓ Descargar PDF</button><button class="btn btn-g btn-sm" onclick="closeM('m-pdf')">✕</button></div></div>
     <div class="mb" style="background:var(--ink3)"><div class="pdf-wrap" id="pdf-content"></div></div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR / AÑADIR LÍNEA EN PEDIDO -->
+<div class="mo" id="m-edit-linea">
+  <div class="md md-lg" style="width:680px">
+    <div class="mh"><div class="mt-title" id="m-edit-linea-title">Editar línea</div><button class="btn btn-g btn-sm" onclick="closeM('m-edit-linea')">✕</button></div>
+    <div class="mb" style="display:flex;flex-direction:column;gap:14px">
+      <!-- Producto -->
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:10px;font-weight:500">Producto</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:9px">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:var(--text2);user-select:none">
+            <input type="checkbox" id="el-manual-toggle" onchange="elToggleManual()"> Coste manual
+          </label>
+        </div>
+        <div id="el-cat-block">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Tipo</label><select class="fc" id="el-tipo" onchange="elOnTipo()"><option value="">— Selecciona —</option></select></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Modelo</label><select class="fc" id="el-mod"><option value="">— Selecciona tipo —</option></select></div>
+          </div>
+        </div>
+        <div id="el-manual-block" style="display:none">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Descripción</label><input type="text" class="fc" id="el-manual-desc" placeholder="Ej: Camiseta personalizada" oninput="elCalc()"></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Coste producto (€)</label><input type="number" class="fc" id="el-manual-coste" step="0.01" min="0" placeholder="0.00" oninput="elCalc()"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Personalización 1 -->
+      <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:10px;font-weight:500">Personalización 1 *</div>
+        <div class="fr3">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="el-mat" onchange="elCalc()"><option value="">— Selecciona —</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec" onchange="elCalc()"><option value="">—</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="el-tam" onchange="elOnTam1()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+        </div>
+        <div id="el-tam1-custom" style="display:none;margin-top:9px">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Ancho (cm)</label><input type="number" class="fc" id="el-tam1-w" step="0.1" min="0" oninput="elCalc()"></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="el-tam1-h" step="0.1" min="0" oninput="elCalc()"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Personalización 2 -->
+      <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin-bottom:10px;font-weight:500">Personalización 2 <span style="font-size:9px;font-weight:400">(opcional)</span></div>
+        <div class="fr3">
+          <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="el-mat2" onchange="elCalc()"><option value="">Ninguno</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec2" onchange="elCalc()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="el-tam2" onchange="elOnTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+        </div>
+        <div id="el-tam2-custom" style="display:none;margin-top:9px">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Ancho (cm)</label><input type="number" class="fc" id="el-tam2-w" step="0.1" min="0" oninput="elCalc()"></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="el-tam2-h" step="0.1" min="0" oninput="elCalc()"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Tiempo + cantidad + preview coste -->
+      <div class="fr">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Tiempo producción (min)</label><input type="number" class="fc" id="el-tpo" value="15" min="1" oninput="elCalc()"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Unidades</label><input type="number" class="fc" id="el-cant" value="1" min="1" oninput="elCalc()"></div>
+      </div>
+      <!-- Preview -->
+      <div class="cp">
+        <div class="cr"><span class="cl">Coste unitario</span><span class="cv hi" id="el-c-unit">—</span></div>
+        <div class="cr" style="border-top:none;padding-top:4px"><span class="cl" style="color:var(--text)">Precio unitario</span><span class="cv price" id="el-c-pf">—</span></div>
+        <div class="cr" style="border-top:none;padding-top:4px"><span class="cl">Total línea</span><span class="cv" style="color:var(--gold);font-size:14px;font-weight:500" id="el-c-tot">—</span></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="closeM('m-edit-linea')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveEditLinea()">Guardar línea</button>
+    </div>
   </div>
 </div>
 
@@ -1314,7 +1390,7 @@ function showDet(id){
   const notasEl=E('det-notas');if(notasEl)notasEl.value=notas;
   const ests=['Presupuesto enviado','Presupuesto aceptado','En proceso','Terminado','Cobrado'];
   const sel=E('h-est-sel');sel.innerHTML=ests.map(e=>`<option ${e===ped.estado?'selected':''}>${e}</option>`).join('');sel.dataset.pid=id;
-  E('h-det-body').innerHTML=dets.map(d=>{
+  E('h-det-body').innerHTML=dets.map((d,i)=>{
     const cu=d.cant>0?(d.costeR/d.cant):0;
     const lmarg=d.totLinea>0?((d.benef||0)/d.totLinea*100):0;
     const pers1=[d.mat,d.tec,d.tam].filter(Boolean).join(' · ')||'—';
@@ -1331,6 +1407,10 @@ function showDet(id){
     <td class="tm" style="color:var(--text2)">${fmt(d.costeR)}</td>
     <td class="tm" style="color:var(--green)">${fmt(d.benef)}</td>
     <td class="tm" style="color:${lmarg>30?'var(--green)':lmarg>15?'var(--gold)':'var(--red)'}">${lmarg.toFixed(1)}%</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-g btn-xs" onclick="openEditLinea(${id},${i})" title="Editar línea">✎</button>
+      <button class="btn btn-g btn-xs" style="color:var(--red)" onclick="delLinea(${id},${i})" title="Eliminar línea">✕</button>
+    </td>
   </tr>`;}).join('');
   E('h-det').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -1364,7 +1444,195 @@ function delPedido(id){
   });
 }
 
-// ── PDF ──────────────────────────────────────────────────────
+// ── EDITAR / AÑADIR LÍNEA EN PEDIDO EXISTENTE ────────────────
+let _elPedidoId=null, _elLineaIdx=null; // null = modo añadir
+
+function _elFillSelects(){
+  const mo=db.materiales.map(m=>`<option>${m.tipo}</option>`).join('');
+  E('el-mat').innerHTML='<option value="">— Selecciona —</option>'+mo;
+  E('el-mat2').innerHTML='<option value="">Ninguno</option>'+mo;
+  const tipos=[...new Set(db.productos.map(p=>p.tipo))];
+  E('el-tipo').innerHTML='<option value="">— Selecciona —</option>'+tipos.map(t=>`<option>${t}</option>`).join('');
+  E('el-mod').innerHTML='<option value="">— Selecciona tipo —</option>';
+}
+function elOnTipo(){
+  const t=E('el-tipo').value;
+  E('el-mod').innerHTML='<option value="">— Selecciona modelo —</option>'+db.productos.filter(p=>p.tipo===t).map(p=>`<option value="${p.mod}">${p.mod}</option>`).join('');
+  elCalc();
+}
+function elOnTam1(){E('el-tam1-custom').style.display=E('el-tam').value==='custom'?'block':'none';elCalc();}
+function elOnTam2(){E('el-tam2-custom').style.display=E('el-tam2').value==='custom'?'block':'none';elCalc();}
+function elToggleManual(){
+  const on=E('el-manual-toggle').checked;
+  E('el-cat-block').style.display=on?'none':'block';
+  E('el-manual-block').style.display=on?'block':'none';
+  elCalc();
+}
+function elGetTam(sel,wId,hId){
+  const v=E(sel).value;
+  if(!v||v==='')return null;
+  if(v==='custom'){const w=parseFloat(E(wId).value)||0,h=parseFloat(E(hId).value)||0;return(w>0&&h>0)?`${w}x${h}`:null;}
+  return v;
+}
+function elCalc(){
+  const manual=E('el-manual-toggle').checked;
+  const m1=E('el-mat').value, tec1=E('el-tec').value;
+  const m2=E('el-mat2').value, tec2=E('el-tec2').value;
+  const tam1=elGetTam('el-tam','el-tam1-w','el-tam1-h');
+  const tam2=elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const tpo=parseFloat(E('el-tpo').value)||0;
+  const cant=parseInt(E('el-cant').value)||1;
+  const p=db.params;
+  let cp=null;
+  if(manual){const v=parseFloat(E('el-manual-coste').value);cp=isNaN(v)?null:v;}
+  else{const prod=db.productos.find(x=>x.tipo===E('el-tipo').value&&x.mod===E('el-mod').value);cp=prod?prod.coste:null;}
+  const cm1=m1&&tam1?matCTam(m1,tam1):null;
+  const cm2val=m2&&tam2?matCTam(m2,tam2):0;
+  const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
+  const mo=(p.precioHora/60)*tpo;
+  if(cp===null||cm1===null){E('el-c-unit').textContent='—';E('el-c-pf').textContent='—';E('el-c-tot').textContent='—';return}
+  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  const pf=pFin(u);
+  E('el-c-unit').textContent=fmtn(u)+' €';
+  E('el-c-pf').textContent=fmtn(pf)+' €';
+  E('el-c-tot').textContent=fmtn(pf*cant)+' €';
+}
+function openEditLinea(pedidoId, lineaIdx){
+  _elPedidoId=pedidoId; _elLineaIdx=lineaIdx;
+  E('m-edit-linea-title').textContent='Editar línea';
+  _elFillSelects();
+  const dets=db.detalles.filter(d=>d.pedidoId===pedidoId);
+  const d=dets[lineaIdx];
+  if(!d)return;
+  // Detectar si es manual (no tiene tipo/mod en catálogo)
+  const inCat=db.productos.some(p=>p.tipo===d.tipo&&p.mod===d.mod);
+  E('el-manual-toggle').checked=!inCat;
+  elToggleManual();
+  if(inCat){
+    E('el-tipo').value=d.tipo; elOnTipo();
+    setTimeout(()=>{E('el-mod').value=d.mod;},0);
+  } else {
+    E('el-manual-desc').value=d.tipo||'';
+    E('el-manual-coste').value=''; // coste original no guardado, user lo reintroduce
+  }
+  // Material 1
+  E('el-mat').value=d.mat||'';
+  E('el-tec').value=d.tec||'';
+  if(d.tam&&['10x10','10x20','10x30','20x20','20x30','40x60'].includes(d.tam)){
+    E('el-tam').value=d.tam;
+  } else if(d.tam){
+    E('el-tam').value='custom';
+    const parts=d.tam.split('x');
+    E('el-tam1-w').value=parts[0]||'';E('el-tam1-h').value=parts[1]||'';
+    E('el-tam1-custom').style.display='block';
+  }
+  // Material 2
+  E('el-mat2').value=d.mat2||'';
+  E('el-tec2').value=d.tec2||'';
+  if(d.tam2&&['10x10','10x20','10x30','20x20','20x30','40x60'].includes(d.tam2)){
+    E('el-tam2').value=d.tam2;
+  } else if(d.tam2){
+    E('el-tam2').value='custom';
+    const parts=d.tam2.split('x');
+    E('el-tam2-w').value=parts[0]||'';E('el-tam2-h').value=parts[1]||'';
+    E('el-tam2-custom').style.display='block';
+  }
+  E('el-cant').value=d.cant||1;
+  E('el-tpo').value=15;
+  elCalc();
+  openM('m-edit-linea');
+}
+function openAddLinea(){
+  if(!currentPedidoId){toast('Abre un pedido primero','err');return}
+  _elPedidoId=currentPedidoId; _elLineaIdx=null;
+  E('m-edit-linea-title').textContent='Añadir línea al pedido';
+  _elFillSelects();
+  E('el-manual-toggle').checked=false; elToggleManual();
+  ['el-tipo','el-mod','el-mat','el-tec','el-tam','el-mat2','el-tec2','el-tam2'].forEach(id=>E(id).value='');
+  ['el-tam1-w','el-tam1-h','el-tam2-w','el-tam2-h','el-manual-desc','el-manual-coste'].forEach(id=>E(id).value='');
+  E('el-tam1-custom').style.display='none'; E('el-tam2-custom').style.display='none';
+  E('el-tpo').value='15'; E('el-cant').value='1';
+  E('el-c-unit').textContent='—'; E('el-c-pf').textContent='—'; E('el-c-tot').textContent='—';
+  openM('m-edit-linea');
+}
+function saveEditLinea(){
+  const manual=E('el-manual-toggle').checked;
+  const m1=E('el-mat').value, tec1=E('el-tec').value;
+  const tam1=elGetTam('el-tam','el-tam1-w','el-tam1-h');
+  const m2=E('el-mat2').value, tec2=E('el-tec2').value;
+  const tam2=elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const tpo=parseFloat(E('el-tpo').value)||0;
+  const cant=parseInt(E('el-cant').value)||1;
+  const p=db.params;
+  let tipo,mod,cp;
+  if(manual){
+    tipo=E('el-manual-desc').value.trim()||'Producto manual'; mod='';
+    cp=parseFloat(E('el-manual-coste').value);
+    if(isNaN(cp)||!m1||!tam1||!tec1){toast('Completa: coste, material, técnica y tamaño','err');return}
+  } else {
+    tipo=E('el-tipo').value; mod=E('el-mod').value;
+    if(!tipo||!mod||!m1||!tam1||!tec1){toast('Completa los campos obligatorios','err');return}
+    const prod=db.productos.find(x=>x.tipo===tipo&&x.mod===mod);
+    if(!prod){toast('Selecciona un producto válido','err');return}
+    cp=prod.coste;
+  }
+  const cm1=matCTam(m1,tam1);
+  const cm2val=m2&&tam2?matCTam(m2,tam2):0;
+  const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
+  const mo=(p.precioHora/60)*tpo;
+  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  const pf=pFin(u);
+  const nuevaLinea={pedidoId:_elPedidoId,fecha:new Date().toISOString().slice(0,10),cliente:'',tipo,mod,mat:m1,tec:tec1,tam:tam1,mat2:m2||'',tec2:tec2||'',tam2:tam2||'',cant,pu:pf,totLinea:pf*cant,costeR:u*cant,benef:(pf-u)*cant};
+  const dets=db.detalles.filter(d=>d.pedidoId===_elPedidoId);
+  if(_elLineaIdx===null){
+    // Añadir
+    db.detalles.push(nuevaLinea);
+  } else {
+    // Editar: reemplazar la línea correspondiente en db.detalles
+    const allDets=db.detalles;
+    let count=0;
+    for(let i=0;i<allDets.length;i++){
+      if(allDets[i].pedidoId===_elPedidoId){
+        if(count===_elLineaIdx){allDets[i]={...nuevaLinea};break;}
+        count++;
+      }
+    }
+  }
+  // Recalcular totales del pedido
+  _recalcPedido(_elPedidoId);
+  saveDB();
+  closeM('m-edit-linea');
+  showDet(_elPedidoId);
+  rHist();
+  toast(_elLineaIdx===null?'Línea añadida ✓':'Línea actualizada ✓');
+}
+function delLinea(pedidoId, lineaIdx){
+  const dets=db.detalles.filter(d=>d.pedidoId===pedidoId);
+  if(dets.length<=1){toast('El pedido debe tener al menos una línea','err');return}
+  confirm2('Eliminar línea','¿Eliminar esta línea del pedido?',()=>{
+    let count=0;
+    db.detalles=db.detalles.filter(d=>{
+      if(d.pedidoId!==pedidoId)return true;
+      return count++!==lineaIdx;
+    });
+    _recalcPedido(pedidoId);
+    saveDB();showDet(pedidoId);rHist();
+    toast('Línea eliminada','inf');
+  });
+}
+function _recalcPedido(pedidoId){
+  const ped=db.historial.find(p=>p.id===pedidoId);
+  if(!ped)return;
+  const dets=db.detalles.filter(d=>d.pedidoId===pedidoId);
+  const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
+  // Mantener el mismo descuento proporcional si había uno
+  const oldSubtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
+  const dtoRatio=oldSubtotal>0&&ped.total<oldSubtotal?(1-ped.total/oldSubtotal):0;
+  const total=subtotal*(1-dtoRatio);
+  const benef=dets.reduce((s,d)=>s+(d.benef||0),0)*(1-dtoRatio);
+  ped.total=Math.round(total*100)/100;
+  ped.benef=Math.round(benef*100)/100;
+}
 function showPDF(){
   const id=currentPedidoId;if(!id)return;
   const ped=db.historial.find(p=>p.id===id),dets=db.detalles.filter(d=>d.pedidoId===id);
