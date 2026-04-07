@@ -433,16 +433,18 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:10px;font-weight:500">Personalización 1 *</div>
             <div class="fr3">
               <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="np-mat" onchange="calc()"><option value="">— Selecciona —</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec" onchange="calc()"><option value="">— Selecciona —</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam" onchange="onTam1()"><option value="">— Selecciona —</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec" onchange="onTec1()"><option value="">— Selecciona —</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option><option>Laser</option></select></div>
+              <div class="fg" style="margin-bottom:0" id="np-tam-block"><label class="fl">Tamaño</label><select class="fc" id="np-tam" onchange="onTam1()"><option value="">— Selecciona —</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+              <div class="fg" style="margin-bottom:0;display:none" id="np-laser-block"><label class="fl">Tiempo máquina laser (min)</label><input type="number" class="fc" id="np-laser-min" step="1" min="0" placeholder="ej: 30" oninput="calc()"></div>
             </div>
           </div>
           <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:11px">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin-bottom:10px;font-weight:500">Personalización 2 <span style="font-size:9px;font-weight:400">(opcional)</span></div>
             <div class="fr3">
               <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="np-mat2" onchange="calc()"><option value="">Ninguno</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec2" onchange="calc()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-              <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="np-tam2" onchange="onTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+              <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="np-tec2" onchange="onTec2()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option><option>Laser</option></select></div>
+              <div class="fg" style="margin-bottom:0" id="np-tam2-block"><label class="fl">Tamaño</label><select class="fc" id="np-tam2" onchange="onTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+              <div class="fg" style="margin-bottom:0;display:none" id="np-laser2-block"><label class="fl">Tiempo máquina laser (min)</label><input type="number" class="fc" id="np-laser2-min" step="1" min="0" placeholder="ej: 15" oninput="calc()"></div>
             </div>
           </div>
           <div id="tam1-custom" style="display:none;margin-bottom:11px">
@@ -480,6 +482,7 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div class="cr"><span class="cl">Electricidad</span><span class="cv" id="c-elec">0,08 €</span></div>
             <div class="cr"><span class="cl">Amortización</span><span class="cv" id="c-amor">0,16 €</span></div>
             <div class="cr"><span class="cl">Tinta sublimación</span><span class="cv" id="c-tinta">—</span></div>
+            <div class="cr" id="c-laser-row" style="display:none"><span class="cl">Coste máquina laser</span><span class="cv" id="c-laser">—</span></div>
             <div class="cr sep"><span class="cl">Coste unitario</span><span class="cv hi" id="c-unit">—</span></div>
             <div class="cr" style="border-top:none;padding-top:4px">
               <span class="cl" style="color:var(--text)">Precio (+<span id="c-marg-pct">40</span>%)</span>
@@ -1208,6 +1211,13 @@ function initPedido(){
   E('np-mat').innerHTML='<option value="">— Selecciona —</option>'+mo;
   E('np-mat2').innerHTML='<option value="">Ninguno</option>'+mo;
   E('c-marg-pct').textContent=Math.round(db.params.margen*100);
+  // Hook material 1 change to auto-select Laser technique
+  E('np-mat').addEventListener('change', function(){
+    if(this.value.toLowerCase().includes('laser')){
+      E('np-tec').value='Laser';
+      onTec1();
+    }
+  });
   rOrderLines();
 }
 function onCli(){const id=E('np-cli').value;const el=E('np-cli-info');if(!id){el.style.display='none';return}const c=db.clientes.find(x=>x.id===id);el.textContent=c?`${c.empresa} · ${c.tel} · ${c.email}`:'';el.style.display='block'}
@@ -1230,6 +1240,20 @@ function matCTam(tipo,tam){
 }
 function onTam1(){E('tam1-custom').style.display=E('np-tam').value==='custom'?'block':'none';calc();}
 function onTam2(){E('tam2-custom').style.display=E('np-tam2').value==='custom'?'block':'none';calc();}
+function onTec1(){
+  const isLaser=E('np-tec').value==='Laser';
+  E('np-tam-block').style.display=isLaser?'none':'block';
+  E('np-laser-block').style.display=isLaser?'block':'none';
+  if(isLaser){E('tam1-custom').style.display='none';}
+  calc();
+}
+function onTec2(){
+  const isLaser=E('np-tec2').value==='Laser';
+  E('np-tam2-block').style.display=isLaser?'none':'block';
+  E('np-laser2-block').style.display=isLaser?'block':'none';
+  if(isLaser){E('tam2-custom').style.display='none';}
+  calc();
+}
 function toggleManualProd(){
   const on=E('np-manual-toggle').checked;
   E('np-cat-block').style.display=on?'none':'block';
@@ -1244,8 +1268,13 @@ function calc(){
   const t=E('np-tipo').value,m=E('np-mod').value;
   const m1=E('np-mat').value,tec1=E('np-tec').value;
   const m2=E('np-mat2').value,tec2=E('np-tec2').value;
-  const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
-  const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
+  const isLaser1=tec1==='Laser', isLaser2=tec2==='Laser';
+  const tam1=isLaser1?null:getTam('np-tam','np-tam1-w','np-tam1-h');
+  const tam2=isLaser2?null:getTam('np-tam2','np-tam2-w','np-tam2-h');
+  const laserMin1=isLaser1?(parseFloat(E('np-laser-min').value)||0):0;
+  const laserMin2=isLaser2?(parseFloat(E('np-laser2-min').value)||0):0;
+  const LASER_RATE=0.20/60; // €/minuto
+  const laserCost=(laserMin1+laserMin2)*LASER_RATE;
   const tpo=parseFloat(E('np-tpo').value)||0,p=db.params;
   let cp=null;
   if(manual){
@@ -1255,18 +1284,21 @@ function calc(){
     const prod=db.productos.find(x=>x.tipo===t&&x.mod===m);
     cp=prod?prod.coste:null;
   }
-  const cm1=m1&&tam1?matCTam(m1,tam1):null;
-  const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
+  const cm1=(!isLaser1&&m1&&tam1)?matCTam(m1,tam1):null;
+  const cm2val=(!isLaser2&&m2&&m2!==''&&tam2)?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
   const sv=(id,v)=>E(id).textContent=(v!==null&&v!==undefined)?fmtn(v)+' €':'—';
   sv('c-prod',cp);sv('c-mat',cm1);sv('c-mo',mo);
-  if(m2&&m2!==''){E('c-mat2-row').style.display='flex';sv('c-mat2',cm2val);}
+  if(m2&&m2!==''){E('c-mat2-row').style.display='flex';sv('c-mat2',isLaser2?null:cm2val);}
   else{E('c-mat2-row').style.display='none';}
   E('c-elec').textContent=fmtn(p.elec)+' €';E('c-amor').textContent=fmtn(p.amor)+' €';
   sv('c-tinta',tinta>0?tinta:null);
-  if(cp===null||cm1===null){E('c-unit').textContent='—';E('c-pf').textContent='—';return}
-  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  if(laserCost>0){E('c-laser-row').style.display='flex';E('c-laser').textContent=fmtn(laserCost)+' €';}
+  else{E('c-laser-row').style.display='none';}
+  if(cp===null||(cm1===null&&!isLaser1)){E('c-unit').textContent='—';E('c-pf').textContent='—';return}
+  const matCost1=(isLaser1?0:(cm1||0));
+  const u=cp+matCost1+cm2val+tinta+p.elec+p.amor+mo+laserCost;
   E('c-unit').textContent=fmtn(u)+' €';E('c-pf').textContent=fmtn(pFin(u))+' €';
 }
 function addLine(){
@@ -1274,34 +1306,46 @@ function addLine(){
   const cid=E('np-cli').value;
   const m1=E('np-mat').value,tec1=E('np-tec').value;
   const m2=E('np-mat2').value,tec2=E('np-tec2').value;
-  const tam1=getTam('np-tam','np-tam1-w','np-tam1-h');
-  const tam2=getTam('np-tam2','np-tam2-w','np-tam2-h');
+  const isLaser1=tec1==='Laser', isLaser2=tec2==='Laser';
+  const tam1=isLaser1?'laser':getTam('np-tam','np-tam1-w','np-tam1-h');
+  const tam2=isLaser2?'laser':getTam('np-tam2','np-tam2-w','np-tam2-h');
+  const laserMin1=isLaser1?(parseFloat(E('np-laser-min').value)||0):0;
+  const laserMin2=isLaser2?(parseFloat(E('np-laser2-min').value)||0):0;
+  const LASER_RATE=0.20/60;
+  const laserCost=(laserMin1+laserMin2)*LASER_RATE;
   const tpo=parseFloat(E('np-tpo').value)||0,cant=parseInt(E('np-cant').value)||1;
   let t,m,cp;
   if(manual){
     t=E('np-manual-desc').value.trim()||'Producto manual';
     m='';
     cp=parseFloat(E('np-manual-coste').value);
-    if(!cid||isNaN(cp)||!m1||!tam1||!tec1){toast('Completa: coste, material, técnica y tamaño','err');return}
+    if(!cid||isNaN(cp)||!m1||!tec1){toast('Completa: coste, material y técnica','err');return}
+    if(!isLaser1&&!tam1){toast('Selecciona tamaño o introduce tiempo laser','err');return}
   } else {
     t=E('np-tipo').value;m=E('np-mod').value;
-    if(!cid||!t||!m||!m1||!tam1||!tec1){toast('Completa los campos obligatorios (Material 1, Técnica 1 y Tamaño 1)','err');return}
+    if(!cid||!t||!m||!m1||!tec1){toast('Completa los campos obligatorios (Material 1, Técnica 1)','err');return}
+    if(!isLaser1&&!tam1){toast('Selecciona tamaño para la personalización 1','err');return}
     const prod=db.productos.find(p=>p.tipo===t&&p.mod===m);
     if(!prod){toast('Selecciona un producto válido','err');return}
     cp=prod.coste;
   }
   const p=db.params;
-  const cm1=matCTam(m1,tam1);
-  const cm2val=m2&&m2!==''&&tam2?matCTam(m2,tam2):0;
+  const cm1=isLaser1?0:matCTam(m1,tam1);
+  const cm2val=(!isLaser2&&m2&&m2!==''&&tam2&&tam2!=='laser')?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
-  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo+laserCost;
   const pf=pFin(u);
   const cli=db.clientes.find(c=>c.id===cid);
-  order.push({fecha:new Date().toISOString().slice(0,10),cliente:cli.nombre,tipo:t,mod:m,mat:m1,tec:tec1,tam:tam1,mat2:m2||'',tec2:tec2||'',tam2:tam2||'',cant,pu:pf,total:pf*cant,cu:u});
+  const tamDisplay1=isLaser1?`Laser ${laserMin1}min`:tam1;
+  const tamDisplay2=isLaser2?`Laser ${laserMin2}min`:(tam2||'');
+  order.push({fecha:new Date().toISOString().slice(0,10),cliente:cli.nombre,tipo:t,mod:m,mat:m1,tec:tec1,tam:tamDisplay1,mat2:m2||'',tec2:tec2||'',tam2:tamDisplay2,cant,pu:pf,total:pf*cant,cu:u});
   rOrderLines();toast(`"${t}" añadido`);
   ['np-tipo','np-mod','np-mat','np-tec','np-tam','np-mat2','np-tec2','np-tam2','np-tam1-w','np-tam1-h','np-tam2-w','np-tam2-h'].forEach(id=>{if(E(id))E(id).value=''});
   if(manual){E('np-manual-desc').value='';E('np-manual-coste').value='';}
+  E('np-laser-min').value='';E('np-laser2-min').value='';
+  E('np-laser-block').style.display='none';E('np-tam-block').style.display='block';
+  E('np-laser2-block').style.display='none';E('np-tam2-block').style.display='block';
   E('tam1-custom').style.display='none';E('tam2-custom').style.display='none';
   E('np-tpo').value='15';E('np-cant').value='1';E('np-prod-info').style.display='none';calc();
 }
