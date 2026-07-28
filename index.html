@@ -601,8 +601,15 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:4px">Notas internas</div>
             <textarea id="det-notas" class="fc" rows="2" style="font-size:12px;resize:vertical" placeholder="Notas internas del pedido..." oninput="saveNotas()"></textarea>
           </div>
-          <div style="display:flex;gap:18px;justify-content:flex-end;margin-left:auto">
-            <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Descuento</div><div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--red)" id="det-dto">—</div></div>
+          <div style="display:flex;gap:18px;justify-content:flex-end;margin-left:auto;align-items:flex-end;flex-wrap:wrap">
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Descuento (%)</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
+                <input type="number" id="det-dto-pct" value="0" min="0" max="100" step="1" oninput="applyDetDto()" style="width:56px;background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:4px 7px;color:var(--red);font-family:'DM Mono',monospace;font-size:13px;text-align:right;outline:none">
+                <span style="font-size:12px;color:var(--text2)">%</span>
+              </div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-top:2px" id="det-dto">—</div>
+            </div>
             <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Coste total</div><div style="font-family:'DM Mono',monospace;font-size:14px;color:var(--text2)" id="det-coste">—</div></div>
             <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Total pedido</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--gold)" id="det-tot"></div></div>
             <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">Beneficio</div><div style="font-family:'DM Mono',monospace;font-size:17px;color:var(--green)" id="det-ben"></div></div>
@@ -751,7 +758,7 @@ tbody td{padding:10px 12px;color:var(--text)}
   <div class="md">
     <div class="mh"><div class="mt-title">Nuevo Producto</div><button class="btn btn-g btn-sm" onclick="closeM('m-prod')">✕</button></div>
     <div class="mb">
-      <div class="fr"><div class="fg"><label class="fl">Tipo *</label><select class="fc" id="mp-tipo"><option>Camiseta</option><option>Sudadera</option><option>Polo</option><option>Bolsa</option><option>Botella</option><option>Taza</option><option>Abridor</option><option>Bolígrafo</option></select></div><div class="fg"><label class="fl">Modelo *</label><input type="text" class="fc" id="mp-mod" placeholder="Ej: ATOMIC 150G"></div></div>
+      <div class="fr"><div class="fg"><label class="fl">Tipo *</label><input type="text" class="fc" id="mp-tipo" list="mp-tipo-list" placeholder="Ej: Camiseta (o escribe uno nuevo)" autocomplete="off"><datalist id="mp-tipo-list"><option>Camiseta</option><option>Sudadera</option><option>Polo</option><option>Bolsa</option><option>Botella</option><option>Taza</option><option>Abridor</option><option>Bolígrafo</option></datalist></div><div class="fg"><label class="fl">Modelo *</label><input type="text" class="fc" id="mp-mod" placeholder="Ej: ATOMIC 150G"></div></div>
       <div class="fr"><div class="fg"><label class="fl">Sexo</label><select class="fc" id="mp-sex"><option value="">—</option><option>Unisex</option><option>Hombre</option><option>Mujer</option></select></div><div class="fg"><label class="fl">Tejido</label><input type="text" class="fc" id="mp-tej" placeholder="100% Algodón"></div></div>
       <div class="fr"><div class="fg"><label class="fl">Colores</label><input type="text" class="fc" id="mp-col" placeholder="NEGRO, BLANCO..."></div><div class="fg"><label class="fl">Coste Base (€) *</label><input type="number" class="fc" id="mp-cos" step="0.01" placeholder="0.00"></div></div>
     </div>
@@ -808,11 +815,22 @@ tbody td{padding:10px 12px;color:var(--text)}
       </div>
       <!-- Personalización 1 -->
       <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:10px;font-weight:500">Personalización 1 *</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);font-weight:500">Personalización 1 *</div>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:10.5px;color:var(--text2);user-select:none">
+            <div style="position:relative;width:28px;height:16px;flex-shrink:0">
+              <input type="checkbox" id="el-matextra1-toggle" onchange="elToggleMatExtra1()" style="opacity:0;width:0;height:0;position:absolute">
+              <div id="el-matextra1-track" style="position:absolute;inset:0;background:var(--border2);border-radius:99px;transition:background .15s"></div>
+              <div id="el-matextra1-thumb" style="position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .15s"></div>
+            </div>
+            + Material adicional
+          </label>
+        </div>
         <div class="fr3">
           <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="el-mat" onchange="elCalc()"><option value="">— Selecciona —</option></select></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec" onchange="elCalc()"><option value="">—</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="el-tam" onchange="elOnTam1()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec" onchange="elOnTec1()"><option value="">—</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option><option>Laser</option></select></div>
+          <div class="fg" style="margin-bottom:0" id="el-tam-block"><label class="fl">Tamaño</label><select class="fc" id="el-tam" onchange="elOnTam1()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+          <div class="fg" style="margin-bottom:0;display:none" id="el-laser-block"><label class="fl">Tiempo laser (min)</label><input type="number" class="fc" id="el-laser-min" step="1" min="0" placeholder="ej: 30" oninput="elCalc()"></div>
         </div>
         <div id="el-tam1-custom" style="display:none;margin-top:9px">
           <div class="fr">
@@ -820,19 +838,42 @@ tbody td{padding:10px 12px;color:var(--text)}
             <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="el-tam1-h" step="0.1" min="0" oninput="elCalc()"></div>
           </div>
         </div>
+        <div id="el-matextra1-block" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(37,37,37,.8)">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Nombre material adicional</label><input type="text" class="fc" id="el-matextra1-nom" placeholder="Ej: Transfer especial" oninput="elCalc()"></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Coste adicional (€)</label><input type="number" class="fc" id="el-matextra1-cos" step="0.01" min="0" placeholder="0.00" oninput="elCalc()"></div>
+          </div>
+        </div>
       </div>
       <!-- Personalización 2 -->
       <div style="background:var(--ink3);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);margin-bottom:10px;font-weight:500">Personalización 2 <span style="font-size:9px;font-weight:400">(opcional)</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text2);font-weight:500">Personalización 2 <span style="font-size:9px;font-weight:400">(opcional)</span></div>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:10.5px;color:var(--text2);user-select:none">
+            <div style="position:relative;width:28px;height:16px;flex-shrink:0">
+              <input type="checkbox" id="el-matextra2-toggle" onchange="elToggleMatExtra2()" style="opacity:0;width:0;height:0;position:absolute">
+              <div id="el-matextra2-track" style="position:absolute;inset:0;background:var(--border2);border-radius:99px;transition:background .15s"></div>
+              <div id="el-matextra2-thumb" style="position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .15s"></div>
+            </div>
+            + Material adicional
+          </label>
+        </div>
         <div class="fr3">
           <div class="fg" style="margin-bottom:0"><label class="fl">Material</label><select class="fc" id="el-mat2" onchange="elCalc()"><option value="">Ninguno</option></select></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec2" onchange="elCalc()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option></select></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Tamaño</label><select class="fc" id="el-tam2" onchange="elOnTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Técnica</label><select class="fc" id="el-tec2" onchange="elOnTec2()"><option value="">Ninguna</option><option>Vinilo</option><option>Sublimación</option><option>DTF</option><option>Transfer</option><option>Laser</option></select></div>
+          <div class="fg" style="margin-bottom:0" id="el-tam2-block"><label class="fl">Tamaño</label><select class="fc" id="el-tam2" onchange="elOnTam2()"><option value="">—</option><option>10x10</option><option>10x20</option><option>10x30</option><option>20x20</option><option>20x30</option><option>40x60</option><option value="custom">✏ Personalizado</option></select></div>
+          <div class="fg" style="margin-bottom:0;display:none" id="el-laser2-block"><label class="fl">Tiempo laser (min)</label><input type="number" class="fc" id="el-laser2-min" step="1" min="0" placeholder="ej: 15" oninput="elCalc()"></div>
         </div>
         <div id="el-tam2-custom" style="display:none;margin-top:9px">
           <div class="fr">
             <div class="fg" style="margin-bottom:0"><label class="fl">Ancho (cm)</label><input type="number" class="fc" id="el-tam2-w" step="0.1" min="0" oninput="elCalc()"></div>
             <div class="fg" style="margin-bottom:0"><label class="fl">Alto (cm)</label><input type="number" class="fc" id="el-tam2-h" step="0.1" min="0" oninput="elCalc()"></div>
+          </div>
+        </div>
+        <div id="el-matextra2-block" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(37,37,37,.8)">
+          <div class="fr">
+            <div class="fg" style="margin-bottom:0"><label class="fl">Nombre material adicional</label><input type="text" class="fc" id="el-matextra2-nom" placeholder="Ej: Etiqueta personalizada" oninput="elCalc()"></div>
+            <div class="fg" style="margin-bottom:0"><label class="fl">Coste adicional (€)</label><input type="number" class="fc" id="el-matextra2-cos" step="0.01" min="0" placeholder="0.00" oninput="elCalc()"></div>
           </div>
         </div>
       </div>
@@ -1027,7 +1068,7 @@ function toast(msg,type='ok'){
 }
 
 // ── MODALS ──────────────────────────────────────────────────
-function openM(id){E(id).classList.add('open')}
+function openM(id){E(id).classList.add('open');if(id==='m-prod')_refreshTipoDatalist();}
 function closeM(id){E(id).classList.remove('open')}
 
 // ── CONFIRM ─────────────────────────────────────────────────
@@ -1499,7 +1540,9 @@ function showDet(id){
   const cosTotal=dets.reduce((s,d)=>s+(d.costeR||0),0);
   const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
   const dto=subtotal-ped.total;
+  const dtoPct=subtotal>0&&dto>0.01?Math.round((dto/subtotal)*100):0;
   E('det-coste').textContent=fmt(cosTotal);
+  E('det-dto-pct').value=dtoPct;
   E('det-dto').textContent=dto>0.01?'-'+fmt(dto):'—';
   // Notas
   const notas=ped.notas||'';
@@ -1576,8 +1619,56 @@ function elOnTipo(){
   E('el-mod').innerHTML='<option value="">— Selecciona modelo —</option>'+db.productos.filter(p=>p.tipo===t).map(p=>`<option value="${p.mod}">${p.mod}</option>`).join('');
   elCalc();
 }
+function applyDetDto(){
+  const ped=db.historial.find(p=>p.id===currentPedidoId);if(!ped)return;
+  const dets=db.detalles.filter(d=>d.pedidoId===currentPedidoId);
+  const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
+  const pct=Math.min(Math.max(parseFloat(E('det-dto-pct').value)||0,0),100);
+  const dto=subtotal*(pct/100);
+  const total=subtotal-dto;
+  const benef=dets.reduce((s,d)=>s+(d.benef||0),0)-dto;
+  ped.total=Math.round(total*100)/100;
+  ped.benef=Math.round(benef*100)/100;
+  E('det-dto').textContent=dto>0.01?'-'+fmt(dto):'—';
+  E('det-tot').textContent=fmt(ped.total);
+  E('det-ben').textContent=fmt(ped.benef);
+  const marg=ped.total>0?((ped.benef||0)/ped.total*100):0;
+  E('det-marg').textContent=marg.toFixed(1)+'%';
+  E('det-marg').style.color=marg>30?'var(--green)':marg>15?'var(--gold)':'var(--red)';
+  saveDB();rHist();
+}
 function elOnTam1(){E('el-tam1-custom').style.display=E('el-tam').value==='custom'?'block':'none';elCalc();}
 function elOnTam2(){E('el-tam2-custom').style.display=E('el-tam2').value==='custom'?'block':'none';elCalc();}
+function elOnTec1(){
+  const isLaser=E('el-tec').value==='Laser';
+  E('el-tam-block').style.display=isLaser?'none':'block';
+  E('el-laser-block').style.display=isLaser?'block':'none';
+  if(isLaser){E('el-tam1-custom').style.display='none';}
+  elCalc();
+}
+function elOnTec2(){
+  const isLaser=E('el-tec2').value==='Laser';
+  E('el-tam2-block').style.display=isLaser?'none':'block';
+  E('el-laser2-block').style.display=isLaser?'block':'none';
+  if(isLaser){E('el-tam2-custom').style.display='none';}
+  elCalc();
+}
+function elToggleMatExtra1(){
+  const on=E('el-matextra1-toggle').checked;
+  E('el-matextra1-block').style.display=on?'block':'none';
+  E('el-matextra1-track').style.background=on?'var(--gold)':'var(--border2)';
+  E('el-matextra1-thumb').style.transform=on?'translateX(12px)':'none';
+  if(!on){E('el-matextra1-nom').value='';E('el-matextra1-cos').value='';}
+  elCalc();
+}
+function elToggleMatExtra2(){
+  const on=E('el-matextra2-toggle').checked;
+  E('el-matextra2-block').style.display=on?'block':'none';
+  E('el-matextra2-track').style.background=on?'var(--gold)':'var(--border2)';
+  E('el-matextra2-thumb').style.transform=on?'translateX(12px)':'none';
+  if(!on){E('el-matextra2-nom').value='';E('el-matextra2-cos').value='';}
+  elCalc();
+}
 function elToggleManual(){
   const on=E('el-manual-toggle').checked;
   E('el-cat-block').style.display=on?'none':'block';
@@ -1594,20 +1685,30 @@ function elCalc(){
   const manual=E('el-manual-toggle').checked;
   const m1=E('el-mat').value, tec1=E('el-tec').value;
   const m2=E('el-mat2').value, tec2=E('el-tec2').value;
-  const tam1=elGetTam('el-tam','el-tam1-w','el-tam1-h');
-  const tam2=elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const isLaser1=tec1==='Laser', isLaser2=tec2==='Laser';
+  const tam1=isLaser1?null:elGetTam('el-tam','el-tam1-w','el-tam1-h');
+  const tam2=isLaser2?null:elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const laserMin1=isLaser1?(parseFloat(E('el-laser-min').value)||0):0;
+  const laserMin2=isLaser2?(parseFloat(E('el-laser2-min').value)||0):0;
+  const LASER_RATE=0.20/60;
+  const laserCost=(laserMin1+laserMin2)*LASER_RATE;
   const tpo=parseFloat(E('el-tpo').value)||0;
   const cant=parseInt(E('el-cant').value)||1;
   const p=db.params;
+  const extra1on=E('el-matextra1-toggle').checked;
+  const extra2on=E('el-matextra2-toggle').checked;
+  const extra1cos=extra1on?(parseFloat(E('el-matextra1-cos').value)||0):0;
+  const extra2cos=extra2on?(parseFloat(E('el-matextra2-cos').value)||0):0;
   let cp=null;
   if(manual){const v=parseFloat(E('el-manual-coste').value);cp=isNaN(v)?null:v;}
   else{const prod=db.productos.find(x=>x.tipo===E('el-tipo').value&&x.mod===E('el-mod').value);cp=prod?prod.coste:null;}
-  const cm1=m1&&tam1?matCTam(m1,tam1):null;
-  const cm2val=m2&&tam2?matCTam(m2,tam2):0;
+  const cm1=(!isLaser1&&m1&&tam1)?matCTam(m1,tam1):null;
+  const cm2val=(!isLaser2&&m2&&tam2)?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
-  if(cp===null||cm1===null){E('el-c-unit').textContent='—';E('el-c-pf').textContent='—';E('el-c-tot').textContent='—';return}
-  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  if(cp===null||(cm1===null&&!isLaser1)){E('el-c-unit').textContent='—';E('el-c-pf').textContent='—';E('el-c-tot').textContent='—';return}
+  const matCost1=isLaser1?0:(cm1||0);
+  const u=cp+matCost1+cm2val+tinta+p.elec+p.amor+mo+laserCost+extra1cos+extra2cos;
   const pf=pFin(u);
   E('el-c-unit').textContent=fmtn(u)+' €';
   E('el-c-pf').textContent=fmtn(pf)+' €';
@@ -1665,8 +1766,15 @@ function openAddLinea(){
   _elFillSelects();
   E('el-manual-toggle').checked=false; elToggleManual();
   ['el-tipo','el-mod','el-mat','el-tec','el-tam','el-mat2','el-tec2','el-tam2'].forEach(id=>E(id).value='');
-  ['el-tam1-w','el-tam1-h','el-tam2-w','el-tam2-h','el-manual-desc','el-manual-coste'].forEach(id=>E(id).value='');
+  ['el-tam1-w','el-tam1-h','el-tam2-w','el-tam2-h','el-manual-desc','el-manual-coste','el-laser-min','el-laser2-min'].forEach(id=>E(id).value='');
   E('el-tam1-custom').style.display='none'; E('el-tam2-custom').style.display='none';
+  E('el-tam-block').style.display='block'; E('el-laser-block').style.display='none';
+  E('el-tam2-block').style.display='block'; E('el-laser2-block').style.display='none';
+  ['el-matextra1-toggle','el-matextra2-toggle'].forEach(id=>{E(id).checked=false;});
+  ['el-matextra1-block','el-matextra2-block'].forEach(id=>{E(id).style.display='none';});
+  ['el-matextra1-track','el-matextra2-track'].forEach(id=>{E(id).style.background='var(--border2)';});
+  ['el-matextra1-thumb','el-matextra2-thumb'].forEach(id=>{E(id).style.transform='none';});
+  ['el-matextra1-nom','el-matextra1-cos','el-matextra2-nom','el-matextra2-cos'].forEach(id=>{E(id).value='';});
   E('el-tpo').value='15'; E('el-cant').value='1';
   E('el-c-unit').textContent='—'; E('el-c-pf').textContent='—'; E('el-c-tot').textContent='—';
   openM('m-edit-linea');
@@ -1674,29 +1782,40 @@ function openAddLinea(){
 function saveEditLinea(){
   const manual=E('el-manual-toggle').checked;
   const m1=E('el-mat').value, tec1=E('el-tec').value;
-  const tam1=elGetTam('el-tam','el-tam1-w','el-tam1-h');
+  const isLaser1=tec1==='Laser', isLaser2=E('el-tec2').value==='Laser';
+  const tam1=isLaser1?'laser':elGetTam('el-tam','el-tam1-w','el-tam1-h');
   const m2=E('el-mat2').value, tec2=E('el-tec2').value;
-  const tam2=elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const tam2=isLaser2?'laser':elGetTam('el-tam2','el-tam2-w','el-tam2-h');
+  const laserMin1=isLaser1?(parseFloat(E('el-laser-min').value)||0):0;
+  const laserMin2=isLaser2?(parseFloat(E('el-laser2-min').value)||0):0;
+  const LASER_RATE=0.20/60;
+  const laserCost=(laserMin1+laserMin2)*LASER_RATE;
   const tpo=parseFloat(E('el-tpo').value)||0;
   const cant=parseInt(E('el-cant').value)||1;
   const p=db.params;
+  const extra1on=E('el-matextra1-toggle').checked;
+  const extra2on=E('el-matextra2-toggle').checked;
+  const extra1cos=extra1on?(parseFloat(E('el-matextra1-cos').value)||0):0;
+  const extra2cos=extra2on?(parseFloat(E('el-matextra2-cos').value)||0):0;
   let tipo,mod,cp;
   if(manual){
     tipo=E('el-manual-desc').value.trim()||'Producto manual'; mod='';
     cp=parseFloat(E('el-manual-coste').value);
-    if(isNaN(cp)||!m1||!tam1||!tec1){toast('Completa: coste, material, técnica y tamaño','err');return}
+    if(isNaN(cp)||!m1||!tec1){toast('Completa: coste, material y técnica','err');return}
+    if(!isLaser1&&!tam1){toast('Selecciona tamaño o introduce tiempo laser','err');return}
   } else {
     tipo=E('el-tipo').value; mod=E('el-mod').value;
-    if(!tipo||!mod||!m1||!tam1||!tec1){toast('Completa los campos obligatorios','err');return}
+    if(!tipo||!mod||!m1||!tec1){toast('Completa los campos obligatorios','err');return}
+    if(!isLaser1&&!tam1){toast('Selecciona tamaño para la personalización 1','err');return}
     const prod=db.productos.find(x=>x.tipo===tipo&&x.mod===mod);
     if(!prod){toast('Selecciona un producto válido','err');return}
     cp=prod.coste;
   }
-  const cm1=matCTam(m1,tam1);
-  const cm2val=m2&&tam2?matCTam(m2,tam2):0;
+  const cm1=isLaser1?0:matCTam(m1,tam1);
+  const cm2val=(!isLaser2&&m2&&tam2&&tam2!=='laser')?matCTam(m2,tam2):0;
   const tinta=(tec1==='Sublimación'||tec2==='Sublimación')?p.tinta:0;
   const mo=(p.precioHora/60)*tpo;
-  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo;
+  const u=cp+cm1+cm2val+tinta+p.elec+p.amor+mo+laserCost+extra1cos+extra2cos;
   const pf=pFin(u);
   const nuevaLinea={pedidoId:_elPedidoId,fecha:new Date().toISOString().slice(0,10),cliente:'',tipo,mod,mat:m1,tec:tec1,tam:tam1,mat2:m2||'',tec2:tec2||'',tam2:tam2||'',cant,pu:pf,totLinea:pf*cant,costeR:u*cant,benef:(pf-u)*cant};
   const dets=db.detalles.filter(d=>d.pedidoId===_elPedidoId);
@@ -1757,11 +1876,8 @@ function showPDF(){
   const subtotal=dets.reduce((s,d)=>s+(d.totLinea||0),0);
   const dto=subtotal-ped.total;
   const lineasHTML=dets.map(d=>{
-    const pers1=[d.mat,d.tec,d.tam].filter(Boolean).join(' · ')||'—';
-    const pers2=[d.mat2,d.tec2,d.tam2].filter(Boolean).join(' · ')||'';
     return`<tr>
-      <td><strong style="font-size:13px">${d.tipo}</strong><div style="font-size:11px;color:#666;margin-top:1px">${d.mod||''}</div></td>
-      <td style="font-size:12px;color:#444">${pers1}${pers2?`<div style="font-size:11px;color:#888;margin-top:1px">+ ${pers2}</div>`:''}</td>
+      <td><strong style="font-size:13px">${d.tipo}</strong></td>
       <td style="text-align:center;font-size:12.5px">${d.cant}</td>
       <td style="text-align:right;font-family:monospace;font-size:12.5px">${fmt(d.pu)}</td>
       <td style="text-align:right;font-family:monospace;font-size:13px;font-weight:600">${fmt(d.totLinea)}</td>
@@ -1799,16 +1915,15 @@ function showPDF(){
     <table>
       <thead><tr>
         <th>Producto / Descripción</th>
-        <th>Personalización</th>
         <th style="text-align:center">Uds</th>
         <th style="text-align:right">Precio unit.</th>
         <th style="text-align:right">Total</th>
       </tr></thead>
       <tbody>
         ${lineasHTML}
-        ${subtotal!==ped.total?`<tr><td colspan="4" style="text-align:right;font-size:12px;color:#666;padding:8px 11px">Subtotal</td><td style="text-align:right;font-family:monospace;padding:8px 11px">${fmt(subtotal)}</td></tr>
-        <tr><td colspan="4" style="text-align:right;font-size:12px;color:#c00;padding:4px 11px">Descuento</td><td style="text-align:right;font-family:monospace;color:#c00;padding:4px 11px">- ${fmt(dto)}</td></tr>`:''}
-        <tr class="tr-tot"><td colspan="4" style="text-align:right;font-size:12px;color:#333">TOTAL</td><td style="text-align:right;font-family:monospace;font-size:16px">${fmt(ped.total)}</td></tr>
+        ${subtotal!==ped.total?`<tr><td colspan="3" style="text-align:right;font-size:12px;color:#666;padding:8px 11px">Subtotal</td><td style="text-align:right;font-family:monospace;padding:8px 11px">${fmt(subtotal)}</td></tr>
+        <tr><td colspan="3" style="text-align:right;font-size:12px;color:#c00;padding:4px 11px">Descuento</td><td style="text-align:right;font-family:monospace;color:#c00;padding:4px 11px">- ${fmt(dto)}</td></tr>`:''}
+        <tr class="tr-tot"><td colspan="3" style="text-align:right;font-size:12px;color:#333">TOTAL</td><td style="text-align:right;font-family:monospace;font-size:16px">${fmt(ped.total)}</td></tr>
       </tbody>
     </table>
     ${ped.notas?`<div style="margin-top:18px;background:#fffbf0;border:1px solid #e8d89a;border-radius:6px;padding:12px 14px"><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;color:#b09030;margin-bottom:5px;font-weight:600">Notas</div><div style="font-size:12.5px;color:#444;line-height:1.6">${ped.notas}</div></div>`:''}
@@ -1893,13 +2008,18 @@ function rProductos(){
     <td><button class="btn btn-g btn-xs" style="color:var(--red)" onclick="delProd(${i})">✕</button></td>
   </tr>`).join('');
 }
+function _refreshTipoDatalist(){
+  const base=['Camiseta','Sudadera','Polo','Bolsa','Botella','Taza','Abridor','Bolígrafo'];
+  const all=[...new Set([...base,...db.productos.map(p=>p.tipo)])];
+  E('mp-tipo-list').innerHTML=all.map(t=>`<option>${t}</option>`).join('');
+}
 function saveProducto(){
-  const mod=E('mp-mod').value.trim(),cos=parseFloat(E('mp-cos').value);
-  if(!mod||isNaN(cos)){toast('Faltan campos obligatorios','err');return}
+  const tipo=E('mp-tipo').value.trim(),mod=E('mp-mod').value.trim(),cos=parseFloat(E('mp-cos').value);
+  if(!tipo||!mod||isNaN(cos)){toast('Faltan campos obligatorios','err');return}
   const nid='P'+String(db.productos.length+1).padStart(3,'0');
-  db.productos.push({id:nid,tipo:E('mp-tipo').value,mod,sexo:E('mp-sex').value,tejido:E('mp-tej').value,colores:E('mp-col').value,coste:cos,stock:''});
-  saveDB();closeM('m-prod');rProductos();toast(`Producto "${mod}" añadido`);
-  ['mp-mod','mp-tej','mp-col','mp-cos'].forEach(id=>E(id).value='');
+  db.productos.push({id:nid,tipo,mod,sexo:E('mp-sex').value,tejido:E('mp-tej').value,colores:E('mp-col').value,coste:cos,stock:''});
+  saveDB();closeM('m-prod');rProductos();_refreshTipoDatalist();toast(`Producto "${mod}" añadido`);
+  ['mp-tipo','mp-mod','mp-tej','mp-col','mp-cos'].forEach(id=>{E(id).value='';});
 }
 function delProd(i){confirm2('Eliminar producto',`¿Eliminar "${db.productos[i].mod}"?`,()=>{db.productos.splice(i,1);saveDB();rProductos();toast('Producto eliminado','inf')})}
 
