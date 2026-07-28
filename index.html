@@ -1237,7 +1237,7 @@ function rDashAlertas(){
 
 // ── NUEVO PEDIDO ─────────────────────────────────────────────
 function initPedido(){
-  E('np-cli').innerHTML='<option value="">— Selecciona —</option>'+db.clientes.map(c=>`<option value="${c.id}">${c.nombre}${c.empresa!=='Particular'?' · '+c.empresa:''}</option>`).join('');
+  E('np-cli').innerHTML='<option value="">— Selecciona —</option>'+[...db.clientes].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es')).map(c=>`<option value="${c.id}">${c.nombre}${c.empresa!=='Particular'?' · '+c.empresa:''}</option>`).join('');
   const tipos=[...new Set(db.productos.map(p=>p.tipo))];
   E('np-tipo').innerHTML='<option value="">— Selecciona —</option>'+tipos.map(t=>`<option>${t}</option>`).join('');
   E('np-mod').innerHTML='<option value="">— Selecciona tipo —</option>';
